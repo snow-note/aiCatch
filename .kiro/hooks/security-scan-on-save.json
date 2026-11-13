@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Security Scan on Save",
+      "trigger": "PostFileSave",
+      "description": "Scans the saved file for potential security issues such as secrets, hardcoded credentials, SQL injection, XSS, and insecure configuration.",
+      "matcher": "\\.(js|jsx|ts|tsx|html|css|py|java|php|rb|go|json|ya?ml|env|sh)$",
+      "action": {
+        "type": "agent",
+        "prompt": "Scan this file for potential security issues:\n\n- API keys, passwords, and secrets\n- Hardcoded credentials\n- Potential SQL injection vulnerabilities\n- XSS vulnerabilities\n- Insecure configurations\n\nIf any issues are found, provide specific recommendations for fixing them."
+      }
+    }
+  ]
+}

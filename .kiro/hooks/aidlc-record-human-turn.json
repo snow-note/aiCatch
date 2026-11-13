@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "aidlc-record-human-turn",
+      "description": "Records a real human prompt as the authority event required by approval checkpoints.",
+      "trigger": "UserPromptSubmit",
+      "action": {
+        "type": "command",
+        "command": "aidlc engine hook record-human-turn"
+      },
+      "enabled": true
+    }
+  ]
+}

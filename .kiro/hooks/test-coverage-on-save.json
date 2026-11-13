@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Test Coverage Check on Save",
+      "trigger": "PostFileSave",
+      "description": "Checks whether a corresponding test file exists for the saved source file, and creates or updates tests when they are missing or incomplete.",
+      "matcher": "^(?!.*(\\.test\\.|\\.spec\\.|__tests__|/tests?/|/\\.kiro/|/aidlc/|/node_modules/)).*\\.(js|jsx|ts|tsx|py|java|go|rb|php)$",
+      "action": {
+        "type": "agent",
+        "prompt": "Analyze this file and check whether a corresponding test file exists.\n\nIf tests are missing or incomplete:\n\n- Create or update the test file\n- Make sure all public functions are tested\n- Add edge case tests where applicable"
+      }
+    }
+  ]
+}

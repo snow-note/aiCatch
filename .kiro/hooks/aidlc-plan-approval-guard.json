@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "aidlc-plan-approval-guard",
+      "description": "Blocks Code Generation dispatch and workspace mutation until the exact active plan has a human-owned approval receipt.\n\nMigration note: Tool categories were converted to the tool-name matcher `^(fs_write|fs_append|str_replace|delete_file|code|execute_bash|execute_pwsh|control_bash_process|control_pwsh_process|list_processes|get_process_output)$`, reconstructed from the built-in tool list. Confirm it covers the tools you meant, then enable the hook. Tool categories [subagent, .*invoke_sub_agent.*] are not recognized and contributed no tool names.",
+      "trigger": "PreToolUse",
+      "matcher": "^(fs_write|fs_append|str_replace|delete_file|code|execute_bash|execute_pwsh|control_bash_process|control_pwsh_process|list_processes|get_process_output)$",
+      "action": {
+        "type": "command",
+        "command": "aidlc engine adapter kiro plan-approval-guard"
+      },
+      "enabled": false
+    }
+  ]
+}

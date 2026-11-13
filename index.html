@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1d2b3a" />
+    <title>AI CATCH</title>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="console" data-testid="console">
+        <div class="brand">AI CATCH</div>
+        <div class="bezel">
+          <canvas
+            id="screen"
+            data-testid="game-canvas"
+            width="240"
+            height="160"
+            aria-label="AI CATCH game screen"
+          ></canvas>
+        </div>
+        <div class="controls">
+          <button type="button" id="power-button" data-testid="power-button" class="btn">POWER</button>
+          <div class="hint">&#9664; &#9654; MOVE</div>
+          <button type="button" id="start-button" data-testid="start-button" class="btn">START</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

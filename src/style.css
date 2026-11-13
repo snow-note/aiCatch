@@ -1,0 +1,118 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #1d2b3a;
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #1d2b3a;
+}
+
+/* Fixed logical size 320 x 240; scaled and centred by script (see layout.ts). */
+#console {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 240px;
+  transform-origin: 0 0;
+  box-sizing: border-box;
+  background: #c9c3b0;
+  border-radius: 14px 14px 36px 14px;
+  box-shadow: inset 0 0 0 3px #a7a08a, inset 0 -6px 0 #b0a992;
+  color: #3b3a33;
+}
+
+.brand {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 4px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #6c2b2b;
+}
+
+.bezel {
+  position: absolute;
+  left: 30px;
+  top: 20px;
+  width: 260px;
+  height: 180px;
+  box-sizing: border-box;
+  padding: 10px;
+  background: #3e4452;
+  border-radius: 8px;
+}
+
+#screen {
+  display: block;
+  width: 240px;
+  height: 160px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  touch-action: none;
+  background: #b7c3a5;
+}
+
+.controls {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  top: 206px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  width: 70px;
+  height: 24px;
+  border: 0;
+  border-radius: 12px;
+  color: #f2eedd;
+  background: #8c2f39;
+  box-shadow: 0 3px 0 #5b1d24;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #5b1d24;
+}
+
+#start-button {
+  background: #2f5f8c;
+  box-shadow: 0 3px 0 #1d3b57;
+}
+
+#start-button:active {
+  box-shadow: 0 1px 0 #1d3b57;
+}
+
+.hint {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #6b6858;
+}

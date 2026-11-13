@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "AI-DLC Write Audit and Sensors",
+      "trigger": "PostToolUse",
+      "description": "Records artifact writes and fires sensors when files are written under the AI-DLC record tree. PostToolUse hook for fs_write, fs_append, str_replace.",
+      "matcher": "^(fs_write|fs_append|str_replace)$",
+      "action": {
+        "type": "command",
+        "command": "aidlc engine adapter kiro audit-and-sensors",
+        "timeout": 30
+      }
+    }
+  ]
+}

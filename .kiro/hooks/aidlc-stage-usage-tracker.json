@@ -1,0 +1,1 @@
+{"version": "v1", "hooks": [{"name": "AI-DLC Stage Usage Tracker", "description": "AI-DLCのステージ開始・完了を検出し、aidlc_usage.pyを自動実行してusageを記録する。execute_bashでaidlc engine orchestrateコマンドが実行された際に、ステージ遷移を検出してstart/endを呼び出す。", "trigger": "PostToolUse", "matcher": "^execute_bash$", "action": {"type": "command", "command": "python3 scripts/aidlc_stage_usage_hook.py"}, "timeout": 15}]}

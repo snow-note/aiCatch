@@ -1,0 +1,15 @@
+
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "AI-DLC Task Completed Logger",
+      "description": "Log completed Kiro spec tasks for AI-DLC usage tracking",
+      "trigger": "PostTaskExec",
+      "action": {
+        "type": "command",
+        "command": "python3 scripts/aidlc_hook_event.py task-completed"
+      }
+    }
+  ]
+}

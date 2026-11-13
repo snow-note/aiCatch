@@ -1,0 +1,8 @@
+phase,stage,started_at,ended_at,duration_seconds,credits,notes,host
+inception,requirements-analysis,2026-11-10T15:46:17+09:00,2026-11-10T18:50:13+09:00,11036,,approved: requirements-analysis,
+inception,user-stories,2026-11-10T18:50:30+09:00,2026-11-10T21:55:51+09:00,11121,,approved: user-stories,
+construction,code-generation,2026-11-10T21:55:57+09:00,2026-11-10T21:58:59+09:00,182,,auto-ended by stage transition,
+construction,code-generation,2026-11-10T21:58:59+09:00,2026-11-10T22:26:34+09:00,1655,,auto-ended by stage transition,
+construction,code-generation,2026-11-10T22:26:34+09:00,2026-11-10T22:27:08+09:00,34,,auto-ended by stage transition,
+construction,code-generation,2026-11-10T22:27:08+09:00,2026-11-10T22:33:06+09:00,357,,approved: code-generation,
+construction,build-and-test,2026-11-10T22:33:23+09:00,2026-11-10T22:42:47+09:00,564,,approved: build-and-test,
