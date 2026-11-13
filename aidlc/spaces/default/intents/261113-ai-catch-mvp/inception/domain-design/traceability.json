@@ -1,0 +1,13 @@
+{
+  "stage": "domain-design",
+  "upstream_ids": ["US1.1", "US2.1", "US3.1", "US4.1", "US5.1", "US6.1", "US7.1"],
+  "coverage": [
+    { "id": "US1.1", "status": "OK", "target": "GameState, Bootstrap, ConsoleShell, HighScoreStore, SoundPlayer" },
+    { "id": "US2.1", "status": "OK", "target": "GameState, RunProgress, StageCatalog, Difficulty, Spawner, FallingObjects, Collision, InputTracker, Renderer" },
+    { "id": "US3.1", "status": "OK", "target": "RunProgress, GameState, StageCatalog, Renderer" },
+    { "id": "US4.1", "status": "OK", "target": "RunProgress, GameState, HighScoreStore, Renderer, Sprites" },
+    { "id": "US5.1", "status": "OK", "target": "GameState, HighScoreStore, InputTracker, Renderer" },
+    { "id": "US6.1", "status": "OK", "target": "Renderer, Sprites, SoundPlayer, Layout, ConsoleShell, ScreenAnnouncer, Bootstrap" },
+    { "id": "US7.1", "status": "OK", "target": "Bootstrap, Layout, ConsoleShell, GameState" }
+  ]
+}

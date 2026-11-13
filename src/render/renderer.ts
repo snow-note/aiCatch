@@ -1,25 +1,81 @@
-import { PLAY_H, PLAY_W, START_LIVES, STARTUP_DURATION } from '../game/config';
-import type { GameEvent, GameState } from '../game/state';
+import { CLEAR_BAR_FILL, OBJECT_H, OBJECT_W, PLAY_H, PLAY_W, START_LIVES } from '../game/config';
+import type { GameEvent, GameView, ObjectKind } from '../game/types';
 import {
+  barFill,
+  blinkOn,
+  hudTexts,
+  messagesShown,
+  noiseLines,
+  reachedLine,
+  victoryBarFill,
+  victoryStep,
+} from './screen-timing';
+import {
+  AI_FACE_BROKEN,
+  AI_FACE_RESTORED,
+  FLOPPY,
   FONT,
   FONT_H,
   FONT_W,
   HUMAN,
   LIFE,
+  MAINFRAME,
   OBJECT_SPRITES,
   SEVEN_SEGMENT,
+  TAPE,
   type Bitmap,
 } from './sprites';
+
+/** Every kind has its own sprite; an unknown kind falls back to the LLM chip and never throws (BR2.2). */
+function spriteFor(kind: ObjectKind): Bitmap {
+  switch (kind) {
+    case 'mainframe':
+      return MAINFRAME;
+    case 'tape':
+      return TAPE;
+    case 'floppy':
+      return FLOPPY;
+    case 'gpu':
+      return OBJECT_SPRITES.gpu;
+    case 'robot':
+      return OBJECT_SPRITES.robot;
+    case 'virus':
+      return OBJECT_SPRITES.virus;
+    default:
+      return OBJECT_SPRITES.llm;
+  }
+}
 
 /** Two-tone LCD palette: dark segments on a pale green-grey background (FR9.1). */
 const BG = '#b7c3a5';
 const INK = '#1f2a1c';
 const GHOST = 'rgba(31, 42, 28, 0.10)';
-const OFF_SCREEN = '#8d9880';
 
 const DIGIT_W = 5;
 const DIGIT_H = 9;
 const SCORE_DIGITS = 6;
+
+/** AI bar geometry (shared part): 160 x 6 outline at x 40. */
+const BAR_X = 40;
+const BAR_W = 160;
+const BAR_H = 6;
+const BAR_LABEL_X = 26;
+const BAR_PERCENT_X = 204;
+
+/** Label and number columns used by the score lines. */
+const LABEL_X = 56;
+const VALUE_X = 94;
+const NEW_X = 136;
+
+/** HUD columns (mockups.md). */
+const HUD_NAME_X = 2;
+const HUD_AI_X = 34;
+const HUD_SCORE_X = 66;
+const HUD_PROGRESS_X = 108;
+const HUD_LIVES_X = 202;
+
+/** Victory noise changes position this many times per second. */
+const NOISE_HZ = 10;
 
 interface Popup {
   text: string;
@@ -73,7 +129,7 @@ export class Renderer {
       case 'life-lost':
         this.warning = WARNING_LIFE;
         break;
-      case 'game-start':
+      case 'run-start':
         this.popups = [];
         this.sparks = [];
         this.glitch = 0;
@@ -96,24 +152,28 @@ export class Renderer {
     this.flash = Math.max(0, this.flash - dt);
   }
 
-  /** Draws the whole LCD screen for the current state. `now` is in seconds. */
-  draw(state: GameState, now: number): void {
+  /** Draws the whole LCD screen for the current state. `now` is in seconds. Reads GameView only (BR1.1). */
+  draw(state: GameView, now: number): void {
     const ctx = this.ctx;
     if (!ctx) return;
-    ctx.fillStyle = state.phase === 'power-off' ? OFF_SCREEN : BG;
+    ctx.fillStyle = BG;
     ctx.fillRect(0, 0, PLAY_W, PLAY_H);
 
     switch (state.phase) {
-      case 'power-off':
-        break;
-      case 'startup':
-        this.drawStartup(ctx, state.startupTime / STARTUP_DURATION);
-        break;
       case 'title':
-        this.drawTitle(ctx, state, now);
+        this.drawTitle(ctx, state);
+        break;
+      case 'stage-intro':
+        this.drawStageIntro(ctx, state);
         break;
       case 'playing':
         this.drawPlaying(ctx, state, now);
+        break;
+      case 'stage-clear':
+        this.drawStageClear(ctx, state);
+        break;
+      case 'victory':
+        this.drawVictory(ctx, state);
         break;
       case 'game-over':
         this.drawGameOver(ctx, state, now);
@@ -123,63 +183,53 @@ export class Renderer {
 
   // ---- screens -------------------------------------------------------------
 
-  private drawStartup(ctx: CanvasRenderingContext2D, p: number): void {
-    const wipe = 0.4;
-    if (p < wipe) {
-      // Scan-line fill: the whole screen lights up from the top.
-      ctx.fillStyle = INK;
-      ctx.fillRect(0, 0, PLAY_W, Math.floor((p / wipe) * PLAY_H));
-      return;
-    }
-    const q = Math.min(1, (p - wipe) / (1 - wipe));
-    // Unlit segments show first, then the logo and the five characters appear one by one.
-    this.drawText(ctx, 'AI CATCH', PLAY_W / 2, 40, 3, INK, true);
-    const sprites: Bitmap[] = [
-      HUMAN,
-      OBJECT_SPRITES.llm,
-      OBJECT_SPRITES.gpu,
-      OBJECT_SPRITES.robot,
-      OBJECT_SPRITES.virus,
-    ];
-    const shown = Math.floor(q * (sprites.length + 1));
-    const total = sprites.reduce((w, s) => w + (s[0]?.length ?? 0) + 6, -6);
-    let x = Math.floor((PLAY_W - total) / 2);
-    sprites.forEach((s, i) => {
-      this.drawBitmap(ctx, s, x, 80, i < shown ? INK : GHOST);
-      x += (s[0]?.length ?? 0) + 6;
-    });
+  /** SC-1 (BR1.2). */
+  private drawTitle(ctx: CanvasRenderingContext2D, state: GameView): void {
+    this.drawText(ctx, 'AI CATCH', PLAY_W / 2, 16, 3, INK, true);
+    const row: Bitmap[] = [MAINFRAME, TAPE, FLOPPY, OBJECT_SPRITES.llm, OBJECT_SPRITES.virus];
+    row.forEach((s, i) => this.drawBitmap(ctx, s, 24 + i * 44, 44, INK, OBJECT_W, OBJECT_H));
+    this.drawText(ctx, '2045. A VIRUS BROKE THE AI.', PLAY_W / 2, 72, 1, INK, true);
+    this.drawText(ctx, 'RECOVER COMPUTING HISTORY.', PLAY_W / 2, 80, 1, INK, true);
+    this.drawText(ctx, 'SAVE IT.', PLAY_W / 2, 88, 1, INK, true);
+    this.drawScoreLine(ctx, 'HI-SCORE', state.best, 104);
+    if (blinkOn(state.phaseTime)) this.drawText(ctx, 'PRESS START', PLAY_W / 2, 132, 1, INK, true);
   }
 
-  private drawTitle(ctx: CanvasRenderingContext2D, state: GameState, now: number): void {
-    this.drawText(ctx, 'AI CATCH', PLAY_W / 2, 18, 3, INK, true);
-    const row: Bitmap[] = [
-      OBJECT_SPRITES.llm,
-      OBJECT_SPRITES.gpu,
-      OBJECT_SPRITES.robot,
-      OBJECT_SPRITES.virus,
-    ];
-    let x = 36;
-    for (const s of row) {
-      this.drawBitmap(ctx, s, x, 52, INK);
-      x += 46;
+  /** SC-2 (BR1.3). */
+  private drawStageIntro(ctx: CanvasRenderingContext2D, state: GameView): void {
+    const stage = state.stage;
+    this.drawText(ctx, `STAGE ${stage.stageNumber}`, PLAY_W / 2, 20, 2, INK, true);
+    this.drawText(ctx, stage.name, PLAY_W / 2, 36, 2, INK, true);
+
+    this.drawText(ctx, 'COLLECT', 20, 69, 1, INK, false);
+    let x = 54;
+    for (const kind of stage.collectibles) {
+      this.drawBitmap(ctx, spriteFor(kind), x, 64, INK, OBJECT_W, OBJECT_H);
+      x += 18;
     }
-    this.drawText(ctx, 'HI', 70, 88, 1, INK, false);
-    this.drawNumber(ctx, state.best, 82, 84);
-    if (Math.floor(now * 2) % 2 === 0) {
-      this.drawText(ctx, 'PRESS START', PLAY_W / 2, 124, 1, INK, true);
-    }
+    const total = stage.collectibles.length > 1 ? ' TOTAL' : '';
+    this.drawText(ctx, `X ${stage.requiredCount}${total}`, x + 4, 69, 1, INK, false);
+
+    this.drawText(ctx, 'AVOID', 20, 93, 1, INK, false);
+    this.drawBitmap(ctx, OBJECT_SPRITES.virus, 54, 88, INK, OBJECT_W, OBJECT_H);
+
+    this.drawAiBar(ctx, state.aiRestoration, 124);
   }
 
-  private drawPlaying(ctx: CanvasRenderingContext2D, state: GameState, now: number): void {
-    // HUD: score (seven-segment) and lives.
-    this.drawNumber(ctx, state.score, 4, 3);
+  /** SC-3 (BR2.1-BR2.3). */
+  private drawPlaying(ctx: CanvasRenderingContext2D, state: GameView, now: number): void {
+    const hud = hudTexts(state);
+    this.drawText(ctx, hud.name, HUD_NAME_X, 4, 1, INK, false);
+    this.drawText(ctx, hud.ai, HUD_AI_X, 4, 1, INK, false);
+    this.drawNumber(ctx, state.score, HUD_SCORE_X, 3);
+    this.drawText(ctx, hud.progress, HUD_PROGRESS_X, 4, 1, INK, false);
     this.drawLives(ctx, state, now);
     ctx.fillStyle = INK;
     ctx.fillRect(0, 14, PLAY_W, 1);
     ctx.fillRect(0, PLAY_H - 1, PLAY_W, 1);
 
     for (const o of state.objects) {
-      this.drawBitmap(ctx, OBJECT_SPRITES[o.kind], Math.round(o.x), Math.round(o.y), INK, o.w, o.h);
+      this.drawBitmap(ctx, spriteFor(o.kind), Math.round(o.x), Math.round(o.y), INK, o.w, o.h);
     }
 
     // HUMAN, inverted for a moment after a catch.
@@ -211,28 +261,95 @@ export class Renderer {
     if (this.glitch > 0) this.applyGlitch(ctx, now);
   }
 
-  private drawGameOver(ctx: CanvasRenderingContext2D, state: GameState, now: number): void {
+  /** SC-4 (BR1.4). */
+  private drawStageClear(ctx: CanvasRenderingContext2D, state: GameView): void {
+    const t = state.phaseTime;
+    this.drawText(ctx, state.stage.name, PLAY_W / 2, 28, 2, INK, true);
+    this.drawText(ctx, 'RECOVERED', PLAY_W / 2, 44, 2, INK, true);
+    this.drawAiBar(ctx, barFill(t, state.aiRestoration), 76);
+    if (t >= CLEAR_BAR_FILL) this.drawText(ctx, '+25%', PLAY_W / 2, 88, 1, INK, true);
+    this.drawText(ctx, `BONUS +${state.stage.clearBonus}`, PLAY_W / 2, 108, 1, INK, true);
+    this.drawScoreLine(ctx, 'SCORE', state.score, 124);
+  }
+
+  /** SC-5 (BR1.5). */
+  private drawGameOver(ctx: CanvasRenderingContext2D, state: GameView, now: number): void {
+    const t = state.phaseTime;
     this.drawText(ctx, 'GAME OVER', PLAY_W / 2, 20, 3, INK, true);
-    this.drawText(ctx, 'SCORE', 70, 60, 1, INK, false);
-    this.drawNumber(ctx, state.score, 100, 56);
-    if (state.newHighScore && Math.floor(now * 3) % 2 === 0) {
-      this.drawText(ctx, 'NEW HIGH SCORE', PLAY_W / 2, 82, 1, INK, true);
-    }
-    this.drawText(ctx, 'HI', 70, 104, 1, INK, false);
-    this.drawNumber(ctx, state.best, 82, 100);
-    if (state.canRestart && Math.floor(now * 2) % 2 === 0) {
-      this.drawText(ctx, 'PRESS ANY KEY', PLAY_W / 2, 132, 1, INK, true);
-    }
+    this.drawAiBar(ctx, state.aiRestoration, 56);
+    this.drawText(ctx, reachedLine(state), PLAY_W / 2, 68, 1, INK, true);
+    this.drawScoreLine(ctx, 'SCORE', state.score, 88);
+    this.drawScoreLine(ctx, 'HI-SCORE', state.best, 104);
+    if (state.newHighScore && blinkOn(t)) this.drawText(ctx, 'NEW!', NEW_X, 104, 1, INK, false);
+    if (state.canReturnToTitle && blinkOn(t)) this.drawText(ctx, 'PRESS ANY KEY', PLAY_W / 2, 136, 1, INK, true);
     if (this.glitch > 0) this.applyGlitch(ctx, now);
+  }
+
+  /** SC-6 (BR1.6): reboot, restore, messages, hold. */
+  private drawVictory(ctx: CanvasRenderingContext2D, state: GameView): void {
+    const t = state.phaseTime;
+    const step = victoryStep(t);
+
+    this.drawBitmap(ctx, step === 'reboot' ? AI_FACE_BROKEN : AI_FACE_RESTORED, (PLAY_W - 24) / 2, 8, INK);
+    this.drawAiBar(ctx, step === 'reboot' ? victoryBarFill(t) : 100, 58);
+
+    if (step === 'reboot') {
+      this.drawNoise(ctx, t);
+      return;
+    }
+
+    const shown = messagesShown(t);
+    if (shown >= 1) this.drawText(ctx, 'AI RESTORED — 100%', PLAY_W / 2, 40, 2, INK, true);
+    if (shown >= 2) this.drawText(ctx, 'HUMANS SAVED AI.', PLAY_W / 2, 76, 1, INK, true);
+    if (shown >= 3) this.drawText(ctx, 'SAVE THE AI. SAVE THE FUTURE.', PLAY_W / 2, 90, 1, INK, true);
+
+    if (step === 'hold') {
+      this.drawScoreLine(ctx, 'SCORE', state.score, 108);
+      this.drawScoreLine(ctx, 'HI-SCORE', state.best, 122);
+      if (state.newHighScore && blinkOn(t)) this.drawText(ctx, 'NEW!', NEW_X, 122, 1, INK, false);
+      if (state.canReturnToTitle && blinkOn(t)) this.drawText(ctx, 'PRESS ANY KEY', PLAY_W / 2, 144, 1, INK, true);
+    }
   }
 
   // ---- parts ---------------------------------------------------------------
 
-  private drawLives(ctx: CanvasRenderingContext2D, state: GameState, now: number): void {
+  /** Shared AI bar: outline, fill, label and percent text (SC-2, SC-4, SC-5, SC-6). */
+  private drawAiBar(ctx: CanvasRenderingContext2D, percent: number, y: number): void {
+    const p = Math.min(100, Math.max(0, Number.isFinite(percent) ? percent : 0));
+    this.drawText(ctx, 'AI', BAR_LABEL_X, y, 1, INK, false);
+    ctx.fillStyle = INK;
+    ctx.fillRect(BAR_X, y, BAR_W, 1);
+    ctx.fillRect(BAR_X, y + BAR_H - 1, BAR_W, 1);
+    ctx.fillRect(BAR_X, y, 1, BAR_H);
+    ctx.fillRect(BAR_X + BAR_W - 1, y, 1, BAR_H);
+    const fill = Math.round(((BAR_W - 2) * p) / 100);
+    if (fill > 0) ctx.fillRect(BAR_X + 1, y + 1, fill, BAR_H - 2);
+    this.drawText(ctx, `${Math.round(p)}%`, BAR_PERCENT_X, y, 1, INK, false);
+  }
+
+  /** A label with a seven-segment number; `y` is the label's top. */
+  private drawScoreLine(ctx: CanvasRenderingContext2D, label: string, value: number, y: number): void {
+    this.drawText(ctx, label, LABEL_X, y, 1, INK, false);
+    this.drawNumber(ctx, value, VALUE_X, y - 2);
+  }
+
+  /** Noise lines that fall in number as the reboot ends; positions change NOISE_HZ times a second. */
+  private drawNoise(ctx: CanvasRenderingContext2D, t: number): void {
+    const frame = Math.floor(t * NOISE_HZ);
+    const count = noiseLines(t);
+    ctx.fillStyle = INK;
+    for (let i = 0; i < count; i++) {
+      const y = Math.floor(hash(frame * 7 + i) * PLAY_H);
+      const x = Math.floor(hash(frame * 13 + i) * 100);
+      const w = 40 + Math.floor(hash(frame * 17 + i) * 100);
+      ctx.fillRect(x, y, w, 1);
+    }
+  }
+
+  private drawLives(ctx: CanvasRenderingContext2D, state: GameView, now: number): void {
     const w = LIFE[0]?.length ?? 7;
     const gap = 3;
-    const total = START_LIVES * (w + gap) - gap;
-    let x = PLAY_W - total - 4;
+    let x = HUD_LIVES_X;
     const blinkOff = this.warning > 0 && Math.floor(now * 8) % 2 === 0;
     for (let i = 0; i < START_LIVES; i++) {
       this.drawBitmap(ctx, LIFE, x, 4, GHOST);
@@ -305,6 +422,7 @@ export class Renderer {
     return Math.max(0, text.length * (FONT_W + 1) * scale - scale);
   }
 
+  /** Draws text in the 3 x 5 font; a character missing from the font draws as a space. */
   private drawText(
     ctx: CanvasRenderingContext2D,
     text: string,

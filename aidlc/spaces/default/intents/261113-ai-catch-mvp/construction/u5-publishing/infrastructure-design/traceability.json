@@ -1,0 +1,21 @@
+{
+  "stage": "infrastructure-design",
+  "unit": "u5-publishing",
+  "upstream_ids": ["NFR8.24","NFR7.2","NFR5.15","NFR8.26","NFR2.5","NFR8.25","NFR5.14","NFR3.2","NFR5.16","NFR7.3","NFR6.5","NFR1.5","NFR7.1","NFR8.27"],
+  "coverage": [
+    { "id": "NFR8.24", "status": "OK", "target": "infrastructure-specification Build runtime row (.node-version 24)" },
+    { "id": "NFR7.2", "status": "OK", "target": "infrastructure-specification Static hosting row (Pages settings)" },
+    { "id": "NFR5.15", "status": "OK", "target": "infrastructure-specification Response headers row; monitoring Headers signal" },
+    { "id": "NFR8.26", "status": "OK", "target": "public/_headers copied to dist/_headers (cicd-pipeline stage 3)" },
+    { "id": "NFR2.5", "status": "OK", "target": "cicd-pipeline Size gate (npm run size)" },
+    { "id": "NFR8.25", "status": "OK", "target": "cicd-pipeline stage 2 tests-first size script" },
+    { "id": "NFR5.14", "status": "OK", "target": "monitoring Console and network signal; no backend resources" },
+    { "id": "NFR3.2", "status": "OK", "target": "cicd-pipeline stage 6 load within 2 s on preview" },
+    { "id": "NFR5.16", "status": "OK", "target": "no Pages environment variables; cicd-pipeline review of git ls-files" },
+    { "id": "NFR7.3", "status": "OK", "target": "cicd-pipeline review of README sections" },
+    { "id": "NFR6.5", "status": "OK", "target": "cicd-pipeline review of README sections (assets and originality)" },
+    { "id": "NFR1.5", "status": "OK", "target": "cicd-pipeline stage 6 play check" },
+    { "id": "NFR7.1", "status": "OK", "target": "infrastructure-specification Source repository row (public, MIT, .kiro)" },
+    { "id": "NFR8.27", "status": "OK", "target": "infrastructure-specification Static hosting row (Git integration)" }
+  ]
+}

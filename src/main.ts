@@ -1,7 +1,8 @@
 import './style.css';
-import { SoundPlayer, type SoundName } from './audio/sound';
+import { SoundPlayer, soundForEvent } from './audio/sound';
+import { screenAnnouncement } from './game/announcer';
 import { HighScoreStore, type StorageLike } from './game/highscore';
-import { GameState, type GameEvent } from './game/state';
+import { GameState } from './game/state';
 import { CASING_H, CASING_W, fitCasing } from './render/layout';
 import { Renderer } from './render/renderer';
 
@@ -26,7 +27,6 @@ function el<T extends HTMLElement>(id: string): T {
 function start(): void {
   const consoleEl = el<HTMLDivElement>('console');
   const canvas = el<HTMLCanvasElement>('screen');
-  const powerButton = el<HTMLButtonElement>('power-button');
   const startButton = el<HTMLButtonElement>('start-button');
 
   const sound = new SoundPlayer();
@@ -49,14 +49,6 @@ function start(): void {
   window.visualViewport?.addEventListener('resize', refit);
 
   // ---- buttons -------------------------------------------------------------
-  const power = (): void => {
-    sound.unlock();
-    state.pressPower();
-  };
-  powerButton.addEventListener('click', () => {
-    power();
-    powerButton.blur();
-  });
   startButton.addEventListener('click', () => {
     sound.unlock();
     state.pressStart();
@@ -75,8 +67,8 @@ function start(): void {
     const id = `key:${e.code}`;
     state.inputDown(id, keyDir(e.code));
     if (isActionKey(e.code)) {
-      if (state.phase === 'power-off') power();
-      else state.pressStart();
+      sound.unlock();
+      state.pressStart();
     }
   });
   window.addEventListener('keyup', (e) => {
@@ -84,8 +76,8 @@ function start(): void {
     state.inputUp(`key:${e.code}`);
   });
   window.addEventListener('blur', () => {
-    // Forget held keys if the window loses focus, so nothing sticks.
-    for (const code of ['ArrowLeft', 'ArrowRight']) state.inputUp(`key:${code}`);
+    // Forget every held key and touch if the window loses focus, so nothing sticks (BR7.4).
+    state.releaseAll();
   });
 
   // ---- touch: left or right half of the screen (FR2.2) ---------------------
@@ -118,28 +110,27 @@ function start(): void {
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // ---- events to sound and effects -----------------------------------------
-  const soundFor = (e: GameEvent): SoundName | null => {
-    switch (e.type) {
-      case 'power-on':
-        return 'startup';
-      case 'game-start':
-        return 'game-start';
-      case 'catch':
-        return e.kind === 'gpu' ? 'catch-gpu' : e.kind === 'robot' ? 'catch-robot' : 'catch-llm';
-      case 'virus-hit':
-        return 'virus-hit';
-      case 'game-over':
-        return 'game-over';
-      default:
-        return null;
-    }
-  };
-
   const flushEvents = (): void => {
     for (const e of state.drainEvents()) {
       renderer.onEvent(e);
-      const name = soundFor(e);
+      const name = soundForEvent(e);
       if (name) sound.play(name);
+    }
+  };
+
+  // ---- screen announcements (FR13.2) ---------------------------------------
+  // Write to the hidden live region only when the announcement key changes (BR2.2-BR2.4).
+  const announcer = document.getElementById('announcer');
+  let lastKey: string | null = null;
+  const announce = (): void => {
+    try {
+      const a = screenAnnouncement(state.view);
+      if (announcer && a.key !== lastKey) {
+        announcer.textContent = a.text;
+        lastKey = a.key;
+      }
+    } catch {
+      // Announcements must never stop the game loop.
     }
   };
 
@@ -157,7 +148,8 @@ function start(): void {
       acc -= STEP;
     }
     flushEvents();
-    renderer.draw(state, nowMs / 1000);
+    renderer.draw(state.view, nowMs / 1000);
+    announce();
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

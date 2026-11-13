@@ -45,6 +45,24 @@ describe('InputTracker direction', () => {
   });
 });
 
+describe('InputTracker clear (BR7.4)', () => {
+  it('leaves no direction after clear()', () => {
+    const t = new InputTracker();
+    t.press('key:Left', -1);
+    t.press('touch:1', 1);
+    t.clear();
+    expect(t.direction()).toBe(0);
+  });
+
+  it('counts a press of a previously held id as new after clear()', () => {
+    const t = new InputTracker();
+    t.press('key:Enter');
+    expect(t.press('key:Enter')).toBe(false);
+    t.clear();
+    expect(t.press('key:Enter')).toBe(true);
+  });
+});
+
 describe('InputTracker new-press detection', () => {
   it('reports a first press as new and a held repeat as not new', () => {
     const t = new InputTracker();

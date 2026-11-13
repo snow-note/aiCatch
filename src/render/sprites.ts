@@ -101,7 +101,134 @@ export const LIFE: Bitmap = [
   '...#...',
 ];
 
-export const OBJECT_SPRITES = { llm: LLM_MODEL, gpu: GPU, robot: ROBOT, virus: VIRUS } as const;
+/** FORTRAN era: tall cabinet, two tape reels on top, a row of panel lights (BR2.2). */
+export const MAINFRAME: Bitmap = [
+  '...##......##...',
+  '..#..#....#..#..',
+  '..#..#....#..#..',
+  '...##......##...',
+  '.##############.',
+  '.#............#.',
+  '.#..#.#.#.#.#.#.',
+  '.#............#.',
+  '.#.##########.#.',
+  '.#.#........#.#.',
+  '.#.##########.#.',
+  '.#............#.',
+  '.#..###..###..#.',
+  '.#............#.',
+  '.##############.',
+  '..##........##..',
+];
+
+/** COBOL era: open reel, a ring with a hub and a strip of tape trailing out (BR2.2). */
+export const TAPE: Bitmap = [
+  '....########....',
+  '..##........##..',
+  '.#............#.',
+  '.#....####....#.',
+  '#....##..##....#',
+  '#....#....#....#',
+  '#....#....#....#',
+  '#....##..##....#',
+  '.#....####....#.',
+  '.#............#.',
+  '..##........##..',
+  '....########....',
+  '.........##.....',
+  '....#######.####',
+];
+
+/** BASIC era: square with a cut corner, a shutter at the top and a label (BR2.2). */
+export const FLOPPY: Bitmap = [
+  '#############...',
+  '#..#######..##..',
+  '#..#####.#...##.',
+  '#..#####.#....##',
+  '#..#######.....#',
+  '#..............#',
+  '#..............#',
+  '#..............#',
+  '#.############.#',
+  '#.#..........#.#',
+  '#.#.########.#.#',
+  '#.#..........#.#',
+  '#.#.#######..#.#',
+  '#.#..........#.#',
+  '#.############.#',
+  '################',
+];
+
+export const OBJECT_SPRITES = {
+  mainframe: MAINFRAME,
+  tape: TAPE,
+  floppy: FLOPPY,
+  llm: LLM_MODEL,
+  gpu: GPU,
+  robot: ROBOT,
+  virus: VIRUS,
+} as const;
+
+/** Left half (12 columns) of the restored AI face; the right half is its mirror image. */
+const AI_FACE_LEFT: readonly string[] = [
+  '...........#',
+  '...........#',
+  '...........#',
+  '...#########',
+  '..##........',
+  '.##.........',
+  '.#..........',
+  '.#..........',
+  '.#...####...',
+  '.#..######..',
+  '.#...####...',
+  '.#..........',
+  '.#..........',
+  '.#..........',
+  '.#...#......',
+  '.#....######',
+  '.#..........',
+  '.#..........',
+  '.##.........',
+  '..##........',
+  '...#########',
+  '.........###',
+  '.......#####',
+  '...#########',
+];
+
+/** AI face, restored look: complete, symmetric, calm eyes and a smile (24 x 24). */
+export const AI_FACE_RESTORED: Bitmap = AI_FACE_LEFT.map((half) => half + [...half].reverse().join(''));
+
+/** Moves a row sideways by n pixels (positive = right), filling with off pixels. */
+function shiftRow(row: string, n: number): string {
+  if (n === 0) return row;
+  return n > 0 ? '.'.repeat(n) + row.slice(0, row.length - n) : row.slice(-n) + '.'.repeat(-n);
+}
+
+/** Switches off one pixel of a row. */
+function clearPixel(row: string, col: number): string {
+  return row.slice(0, col) + '.' + row.slice(col + 1);
+}
+
+const BROKEN_SHIFTS: Readonly<Record<number, number>> = { 6: 3, 9: -2, 13: 2, 16: -3, 21: 2 };
+const BROKEN_HOLES: ReadonlyArray<readonly [number, number]> = [
+  [3, 9],
+  [4, 21],
+  [8, 6],
+  [10, 17],
+  [12, 1],
+  [15, 11],
+  [17, 22],
+  [20, 8],
+];
+
+/** AI face, broken look: scrambled rows and missing pixels (24 x 24). */
+export const AI_FACE_BROKEN: Bitmap = AI_FACE_RESTORED.map((row, r) => {
+  let out = shiftRow(row, BROKEN_SHIFTS[r] ?? 0);
+  for (const [hr, hc] of BROKEN_HOLES) if (hr === r) out = clearPixel(out, hc);
+  return out;
+});
 
 /** Seven-segment digits: which of segments a-g are lit (a top, b top-right, c bottom-right,
  * d bottom, e bottom-left, f top-left, g middle). */
@@ -159,6 +286,11 @@ export const FONT: Record<string, Bitmap> = {
   '+': ['...', '.#.', '###', '.#.', '...'],
   '!': ['.#.', '.#.', '.#.', '...', '.#.'],
   '-': ['...', '...', '###', '...', '...'],
+  '—': ['...', '...', '###', '...', '...'],
+  '%': ['#.#', '..#', '.#.', '#..', '#.#'],
+  '.': ['...', '...', '...', '...', '.#.'],
+  ':': ['...', '.#.', '...', '.#.', '...'],
+  '/': ['..#', '..#', '.#.', '#..', '#..'],
   ' ': ['...', '...', '...', '...', '...'],
 };
 
@@ -168,6 +300,11 @@ export const FONT_H = 5;
 /** All named bitmaps, used by tests and the renderer. */
 export const ALL_SPRITES: Readonly<Record<string, Bitmap>> = {
   human: HUMAN,
+  mainframe: MAINFRAME,
+  tape: TAPE,
+  floppy: FLOPPY,
+  aiFaceBroken: AI_FACE_BROKEN,
+  aiFaceRestored: AI_FACE_RESTORED,
   llm: LLM_MODEL,
   gpu: GPU,
   robot: ROBOT,

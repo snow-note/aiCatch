@@ -1,16 +1,57 @@
 import { describe, expect, it } from 'vitest';
-import { FALL_TIME, PLAY_H, PLAY_W } from '../../src/game/config';
-import { createObject, type ObjectKind } from '../../src/game/objects';
+import {
+  GAME_OVER_DURATION,
+  HUMAN_SPEED,
+  PLAY_H,
+  PLAY_W,
+  POINTS,
+  START_LIVES,
+  STAGES,
+  STAGE_CLEAR_DURATION,
+  STAGE_INTRO_DURATION,
+  VICTORY_DURATION,
+} from '../../src/game/config';
+import { createObject } from '../../src/game/objects';
 import { GameState, type HighScoreLike } from '../../src/game/state';
+import type { GameEvent, GameView, ObjectKind } from '../../src/game/types';
 
-/** A random source that always puts new objects at the far left, away from HUMAN. */
-const farLeft = () => 0;
+const STEP = 1 / 60;
+
+/** Never a VIRUS (0.99 is above every share), always the last collectible, far to the right. */
+const noVirus = () => 0.99;
+
+function fakeStore(initial = 0): HighScoreLike & { submitted: number[] } {
+  const store = {
+    best: initial,
+    submitted: [] as number[],
+    submit(score: number): boolean {
+      store.submitted.push(score);
+      if (score > store.best) {
+        store.best = score;
+        return true;
+      }
+      return false;
+    },
+  };
+  return store;
+}
+
+/** Runs `seconds` of fixed 1/60 s steps. */
+function run(g: GameState, seconds: number): void {
+  const steps = Math.round(seconds * 60);
+  for (let i = 0; i < steps; i++) g.update(STEP);
+}
 
 function newGame(highScore?: HighScoreLike): GameState {
-  const g = new GameState({ random: farLeft, ...(highScore ? { highScore } : {}) });
-  g.pressPower();
-  g.update(2.0);
+  return new GameState({ random: noVirus, ...(highScore ? { highScore } : {}) });
+}
+
+/** Starts a run and waits out the stage intro, so the game is playing Stage 1. */
+function playing(highScore?: HighScoreLike): GameState {
+  const g = newGame(highScore);
   g.pressStart();
+  run(g, STAGE_INTRO_DURATION);
+  g.drainEvents();
   return g;
 }
 
@@ -24,245 +65,387 @@ function drop(g: GameState, kind: ObjectKind): void {
 }
 
 function loseAllLives(g: GameState): void {
-  drop(g, 'virus');
-  drop(g, 'virus');
-  drop(g, 'virus');
+  for (let i = 0; i < START_LIVES; i++) drop(g, 'virus');
 }
 
-describe('power and title', () => {
-  it('does nothing before POWER is pressed', () => {
-    const g = new GameState({ random: farLeft });
-    g.update(5);
-    g.pressStart();
-    g.inputDown('key:Enter');
-    expect(g.phase).toBe('power-off');
-    expect(g.drainEvents()).toEqual([]);
-  });
+/** Catches the stage's required count, then waits through stage-clear and the next intro. */
+function clearStageAndAdvance(g: GameState): void {
+  const stage = g.stage;
+  for (let i = 0; i < stage.requiredCount; i++) drop(g, stage.collectibles[0] as ObjectKind);
+  run(g, STAGE_CLEAR_DURATION);
+}
 
-  it('POWER starts the startup sequence, then the title appears', () => {
-    const g = new GameState({ random: farLeft });
-    g.pressPower();
-    expect(g.phase).toBe('startup');
-    expect(g.drainEvents()).toEqual([{ type: 'power-on' }]);
-    g.update(1.0);
-    expect(g.phase).toBe('startup');
-    g.update(1.0);
-    expect(g.phase).toBe('title');
-  });
-
-  it('ignores START during the startup sequence', () => {
-    const g = new GameState({ random: farLeft });
-    g.pressPower();
-    g.pressStart();
-    expect(g.phase).toBe('startup');
-  });
-
-  it('arrow keys and other taps do not start the game; START does', () => {
-    const g = new GameState({ random: farLeft });
-    g.pressPower();
-    g.update(2);
-    g.inputDown('key:ArrowLeft', -1);
-    g.inputDown('touch:1', 1);
-    g.inputDown('key:KeyQ');
-    expect(g.phase).toBe('title');
-    g.pressStart();
-    expect(g.phase).toBe('playing');
-    expect(g.drainEvents().some((e) => e.type === 'game-start')).toBe(true);
-  });
-});
-
-describe('falling speeds', () => {
-  it('starts each kind at its fall time for the full play height', () => {
-    const times: Record<ObjectKind, number> = { llm: 4.0, gpu: 2.5, robot: 3.5, virus: 3.0 };
-    for (const kind of Object.keys(times) as ObjectKind[]) {
-      const o = createObject(kind, 50, 0);
-      expect(PLAY_H / o.vy).toBeCloseTo(times[kind], 10);
-      expect(FALL_TIME[kind]).toBe(times[kind]);
-    }
-  });
-});
-
-describe('playing', () => {
-  it('starts with 3 lives and score 0', () => {
+describe('title and start (BR1.1-BR1.3, BR1.9)', () => {
+  it('starts on the title with a fresh run', () => {
     const g = newGame();
-    expect(g.lives).toBe(3);
+    expect(g.phase).toBe('title');
+    expect(g.stageIndex).toBe(0);
+    expect(g.caught).toBe(0);
+    expect(g.aiRestoration).toBe(0);
     expect(g.score).toBe(0);
+    expect(g.lives).toBe(START_LIVES);
+    expect(g.canReturnToTitle).toBe(false);
   });
 
-  it('adds 100 / 150 / 200 for LLM MODEL / GPU / ROBOT', () => {
+  it('an arrow inputDown on the title does not start; pressStart does, with ordered events', () => {
     const g = newGame();
-    drop(g, 'llm');
-    expect(g.score).toBe(100);
-    drop(g, 'gpu');
-    expect(g.score).toBe(250);
-    drop(g, 'robot');
-    expect(g.score).toBe(450);
-    expect(g.lives).toBe(3);
+    g.inputDown('key:ArrowRight', 1);
+    g.update(1);
+    expect(g.phase).toBe('title');
+    g.pressStart();
+    expect(g.phase).toBe('stage-intro');
+    expect(g.drainEvents()).toEqual<GameEvent[]>([
+      { type: 'run-start' },
+      { type: 'stage-start', stageIndex: 0 },
+    ]);
+    expect(g.stageIndex).toBe(0);
+    expect(g.score).toBe(0);
+    expect(g.lives).toBe(START_LIVES);
+  });
+});
+
+describe('stage intro (BR1.4, BR7.3)', () => {
+  it('moves to playing after exactly 2.0 s of 1/60 steps, not one step earlier', () => {
+    const g = newGame();
+    g.pressStart();
+    for (let i = 0; i < 119; i++) g.update(STEP);
+    expect(g.phase).toBe('stage-intro');
+    g.update(STEP);
+    expect(g.phase).toBe('playing');
+    expect(g.phaseTime).toBe(0);
   });
 
-  it('removes a caught object right away', () => {
+  it('spawns nothing and ignores start presses during the intro', () => {
     const g = newGame();
-    drop(g, 'llm');
+    g.pressStart();
+    for (let i = 0; i < 100; i++) {
+      g.pressStart();
+      g.update(STEP);
+    }
+    expect(g.phase).toBe('stage-intro');
     expect(g.objects).toHaveLength(0);
   });
 
-  it('VIRUS removes one life and leaves the score', () => {
+  it('does not move HUMAN during the intro, but a held direction moves it on the first playing update', () => {
     const g = newGame();
-    drop(g, 'llm');
-    drop(g, 'virus');
-    expect(g.lives).toBe(2);
-    expect(g.score).toBe(100);
+    g.pressStart();
+    const x0 = g.human.x;
+    g.inputDown('key:ArrowRight', 1);
+    run(g, STAGE_INTRO_DURATION);
+    expect(g.phase).toBe('playing');
+    expect(g.human.x).toBe(x0);
+    g.update(STEP);
+    expect(g.human.x).toBeCloseTo(x0 + HUMAN_SPEED * STEP, 8);
+  });
+});
+
+describe('catching and VIRUS (BR3.x, BR4.x, BR2.2, BR2.6)', () => {
+  it('scores a collectible, counts progress and emits a catch event', () => {
+    const g = playing();
+    drop(g, 'mainframe');
+    expect(g.score).toBe(POINTS.mainframe);
+    expect(g.caught).toBe(1);
+    const events = g.drainEvents();
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ type: 'catch', kind: 'mainframe', points: POINTS.mainframe });
   });
 
-  it('a second VIRUS straight after removes another life (no invulnerability)', () => {
-    const g = newGame();
-    drop(g, 'virus');
-    drop(g, 'virus');
-    expect(g.lives).toBe(1);
+  it('scores a kind outside the stage but adds no progress', () => {
+    const g = playing();
+    drop(g, 'tape');
+    expect(g.score).toBe(POINTS.tape);
+    expect(g.caught).toBe(0);
   });
 
-  it('a missed rescue object changes nothing', () => {
-    const g = newGame();
-    const o = createObject('gpu', 0, 1);
+  it('a VIRUS costs a life, emits virus-hit then life-lost, and leaves the score alone', () => {
+    const g = playing();
+    drop(g, 'mainframe');
+    g.drainEvents();
+    drop(g, 'virus');
+    expect(g.lives).toBe(START_LIVES - 1);
+    expect(g.score).toBe(POINTS.mainframe);
+    expect(g.drainEvents().map((e) => e.type)).toEqual(['virus-hit', 'life-lost']);
+  });
+
+  it('handles the VIRUS and drops both when a collectible is touched in the same update', () => {
+    const g = playing();
+    const m = createObject('mainframe', g.human.x, 1);
+    const v = createObject('virus', g.human.x, 2);
+    m.y = v.y = g.human.y - 4;
+    g.objects.push(m, v);
+    g.update(0.001);
+    expect(g.lives).toBe(START_LIVES - 1);
+    expect(g.score).toBe(0);
+    expect(g.objects).toHaveLength(0);
+    expect(g.drainEvents().map((e) => e.type)).toEqual(['virus-hit', 'life-lost']);
+  });
+
+  it('removes a missed object with no penalty', () => {
+    const g = playing();
+    const o = createObject('mainframe', 0, 1);
     o.y = PLAY_H - 1;
     g.objects.push(o);
-    g.update(0.5);
-    expect(g.objects.includes(o)).toBe(false);
-    expect(g.score).toBe(0);
-    expect(g.lives).toBe(3);
-  });
-
-  it('handles only one object per update, VIRUS first', () => {
-    const g = newGame();
-    const a = createObject('llm', g.human.x, 1);
-    const b = createObject('virus', g.human.x, 2);
-    a.y = b.y = g.human.y - 4;
-    g.objects.push(a, b);
-    g.update(0.001);
-    expect(g.lives).toBe(2);
-    expect(g.score).toBe(0);
+    g.update(0.1);
     expect(g.objects).toHaveLength(0);
-  });
-
-  it('moves HUMAN and stops at both edges', () => {
-    const g = newGame();
-    g.inputDown('key:ArrowLeft', -1);
-    g.update(10);
-    expect(g.human.x).toBe(0);
-    g.inputUp('key:ArrowLeft');
-    g.inputDown('key:ArrowRight', 1);
-    g.update(10);
-    expect(g.human.x).toBe(PLAY_W - g.human.w);
-  });
-
-  it('has no time limit', () => {
-    const g = newGame();
-    for (let i = 0; i < 6000; i++) g.update(0.05);
-    expect(g.phase).toBe('playing');
-    expect(g.lives).toBe(3);
+    expect(g.score).toBe(0);
+    expect(g.lives).toBe(START_LIVES);
+    expect(g.caught).toBe(0);
   });
 });
 
-describe('game over and restart', () => {
-  it('ends the game at 0 lives and reports the event', () => {
-    const g = newGame();
+describe('spawning (BR6.1)', () => {
+  it('never holds more than the stage maximum on screen', () => {
+    const g = playing();
+    const max = STAGES[0]!.difficultyStart.maxObjects;
+    let peak = 0;
+    for (let i = 0; i < 5; i++) {
+      g.update(1.2);
+      peak = Math.max(peak, g.objects.length);
+      expect(g.objects.length).toBeLessThanOrEqual(max);
+    }
+    expect(peak).toBe(max);
+  });
+
+  it('stays bounded and finishes with a huge dt', () => {
+    const g = playing();
+    g.update(1e6);
+    expect(g.objects.length).toBeLessThanOrEqual(STAGES[0]!.difficultyCap.maxObjects);
+    expect(['playing', 'game-over']).toContain(g.phase);
+  });
+});
+
+describe('stage clear (BR2.3-BR2.5, BR1.5, BR1.8)', () => {
+  it('clears the stage on the last catch: objects removed, +500, AI +25, catch before stage-clear', () => {
+    const g = playing();
+    const stage = g.stage;
+    for (let i = 0; i < stage.requiredCount - 1; i++) drop(g, 'mainframe');
+    g.drainEvents();
+    const far = createObject('virus', 0, 5000);
+    g.objects.push(far);
+    drop(g, 'mainframe');
+    expect(g.phase).toBe('stage-clear');
+    expect(g.objects).toHaveLength(0);
+    expect(g.score).toBe(POINTS.mainframe * stage.requiredCount + stage.clearBonus);
+    expect(g.aiRestoration).toBe(25);
+    expect(g.stageIndex).toBe(0);
+    expect(g.stage.name).toBe('FORTRAN');
+    expect(g.caught).toBe(stage.requiredCount);
+    expect(g.drainEvents().map((e) => e.type)).toEqual(['catch', 'stage-clear']);
+  });
+
+  it('carries score and lives into the next intro after 2.5 s', () => {
+    const g = playing();
+    drop(g, 'virus');
+    g.drainEvents();
+    const livesBefore = g.lives;
+    for (let i = 0; i < STAGES[0]!.requiredCount; i++) drop(g, 'mainframe');
+    const scoreBefore = g.score;
+    g.drainEvents();
+    for (let i = 0; i < 149; i++) g.update(STEP);
+    expect(g.phase).toBe('stage-clear');
+    g.update(STEP);
+    expect(g.phase).toBe('stage-intro');
+    expect(g.stageIndex).toBe(1);
+    expect(g.stage.name).toBe('COBOL');
+    expect(g.caught).toBe(0);
+    expect(g.score).toBe(scoreBefore);
+    expect(g.lives).toBe(livesBefore);
+    expect(g.aiRestoration).toBe(25);
+    expect(g.drainEvents()).toEqual<GameEvent[]>([{ type: 'stage-start', stageIndex: 1 }]);
+  });
+});
+
+describe('victory (BR2.7, BR8.1)', () => {
+  it('clearing Stage 4 goes stage-clear then victory with AI 100 and a submitted high score', () => {
+    const store = fakeStore();
+    const g = playing(store);
+    for (let s = 0; s < 3; s++) {
+      clearStageAndAdvance(g);
+      expect(g.phase).toBe('stage-intro');
+      run(g, STAGE_INTRO_DURATION);
+      expect(g.phase).toBe('playing');
+    }
+    expect(g.stageIndex).toBe(3);
+    g.drainEvents();
+    for (let i = 0; i < STAGES[3]!.requiredCount; i++) drop(g, i % 3 === 0 ? 'llm' : i % 3 === 1 ? 'gpu' : 'robot');
+    expect(g.phase).toBe('stage-clear');
+    expect(g.aiRestoration).toBe(100);
+    g.drainEvents();
+    run(g, STAGE_CLEAR_DURATION);
+    expect(g.phase).toBe('victory');
+    expect(g.aiRestoration).toBe(100);
+    expect(g.newHighScore).toBe(true);
+    expect(store.submitted).toHaveLength(1);
+    const events = g.drainEvents();
+    expect(events).toEqual<GameEvent[]>([{ type: 'victory', score: g.score, newHighScore: true }]);
+  });
+
+  it('returns to the title only after 3.5 s on a new press', () => {
+    const g = playing(fakeStore());
+    for (let s = 0; s < 3; s++) {
+      clearStageAndAdvance(g);
+      run(g, STAGE_INTRO_DURATION);
+    }
+    for (let i = 0; i < STAGES[3]!.requiredCount; i++) drop(g, 'llm');
+    run(g, STAGE_CLEAR_DURATION);
+    expect(g.phase).toBe('victory');
+    g.pressStart();
+    expect(g.phase).toBe('victory');
+    run(g, VICTORY_DURATION - 0.1);
+    expect(g.canReturnToTitle).toBe(false);
+    run(g, 0.2);
+    expect(g.canReturnToTitle).toBe(true);
+    g.inputDown('key:Enter', null);
+    g.pressStart();
+    expect(g.phase).toBe('title');
+    expect(g.aiRestoration).toBe(0);
+    expect(g.stageIndex).toBe(0);
+    expect(g.score).toBe(0);
+  });
+});
+
+describe('game over (BR4.3, BR1.6, BR1.9, BR8.1)', () => {
+  it('ends on the last life with the event order, a submitted score and kept run values', () => {
+    const store = fakeStore();
+    const g = playing(store);
+    drop(g, 'mainframe');
     g.drainEvents();
     loseAllLives(g);
     expect(g.phase).toBe('game-over');
-    expect(g.drainEvents().some((e) => e.type === 'game-over')).toBe(true);
+    expect(g.lives).toBe(0);
+    expect(g.objects).toHaveLength(0);
+    expect(g.caught).toBe(1);
+    expect(g.stageIndex).toBe(0);
+    expect(g.newHighScore).toBe(true);
+    expect(store.submitted).toEqual([POINTS.mainframe]);
+    expect(g.drainEvents().map((e) => e.type)).toEqual([
+      'virus-hit',
+      'life-lost',
+      'virus-hit',
+      'life-lost',
+      'virus-hit',
+      'life-lost',
+      'game-over',
+    ]);
   });
 
-  it('ignores a press at 1.9 s and restarts at 2.0 s with 3 lives and score 0', () => {
-    const g = newGame();
-    drop(g, 'llm');
+  it('allows returning to the title only after 2.0 s', () => {
+    const g = playing();
     loseAllLives(g);
-    g.update(1.9);
-    g.inputDown('key:Space');
     g.pressStart();
     expect(g.phase).toBe('game-over');
-    g.inputUp('key:Space');
-    g.update(0.1);
-    expect(g.canRestart).toBe(true);
-    g.inputDown('touch:9');
-    expect(g.phase).toBe('playing');
-    expect(g.lives).toBe(3);
-    expect(g.score).toBe(0);
-    expect(g.objects).toHaveLength(0);
+    for (let i = 0; i < 119; i++) g.update(STEP);
+    expect(g.canReturnToTitle).toBe(false);
+    g.update(STEP);
+    expect(g.canReturnToTitle).toBe(true);
+    expect(g.phaseTime).toBeGreaterThanOrEqual(GAME_OVER_DURATION - 1e-9);
   });
 
-  it('a direction-less mouse press is ignored at 1.9 s and restarts at 2.0 s', () => {
-    const g = newGame();
-    drop(g, 'llm');
+  it('does not treat a key held from play as a new press', () => {
+    const g = playing();
+    g.inputDown('key:Enter', null);
     loseAllLives(g);
-    g.update(1.9);
-    g.inputDown('mouse:1', null);
+    run(g, GAME_OVER_DURATION + 0.1);
+    g.inputDown('key:Enter', null);
     expect(g.phase).toBe('game-over');
-    g.inputUp('mouse:1');
-    g.update(0.1);
-    expect(g.canRestart).toBe(true);
-    g.inputDown('mouse:2', null);
-    expect(g.phase).toBe('playing');
-    expect(g.lives).toBe(3);
+    g.inputUp('key:Enter');
+    g.inputDown('key:Enter', null);
+    expect(g.phase).toBe('title');
+  });
+
+  it('Enter (inputDown then pressStart) on game over reaches only the title; a later press starts a run', () => {
+    const g = playing();
+    loseAllLives(g);
+    run(g, GAME_OVER_DURATION + 0.1);
+    g.drainEvents();
+    g.inputDown('key:Enter', null);
+    g.pressStart();
+    expect(g.phase).toBe('title');
+    expect(g.drainEvents()).toEqual([]);
+    g.update(STEP);
+    g.inputUp('key:Enter');
+    g.inputDown('key:Enter', null);
+    g.pressStart();
+    expect(g.phase).toBe('stage-intro');
     expect(g.score).toBe(0);
+    expect(g.lives).toBe(START_LIVES);
   });
+});
 
-  it('a direction-less mouse press does not start a game from the title', () => {
-    const g = new GameState({ random: farLeft });
-    g.pressPower();
-    g.update(2);
-    expect(g.phase).toBe('title');
-    g.inputDown('mouse:1', null);
-    g.update(0.5);
-    expect(g.phase).toBe('title');
-  });
-
-  it('a direction-less mouse press does not move HUMAN during play', () => {
-    const g = newGame();
-    const x = g.human.x;
-    g.inputDown('mouse:1', null);
-    g.update(1);
-    expect(g.phase).toBe('playing');
-    expect(g.human.x).toBe(x);
-  });
-
-  it('a key held from play does not restart until released and pressed again', () => {
-    const g = newGame();
+describe('input control (BR7.4, BR1.7, BR9.2)', () => {
+  it('releaseAll clears held directions', () => {
+    const g = playing();
+    const x0 = g.human.x;
     g.inputDown('key:ArrowLeft', -1);
-    loseAllLives(g);
-    g.update(2.5);
-    g.inputDown('key:ArrowLeft', -1); // auto-repeat of the held key
-    expect(g.phase).toBe('game-over');
+    g.releaseAll();
+    g.update(STEP);
+    expect(g.human.x).toBe(x0);
+  });
+
+  it('keeps HUMAN inside the play area', () => {
+    const g = playing();
+    g.inputDown('key:ArrowLeft', -1);
+    run(g, 5);
+    expect(g.human.x).toBe(0);
     g.inputUp('key:ArrowLeft');
-    g.inputDown('key:ArrowLeft', -1);
-    expect(g.phase).toBe('playing');
+    g.inputDown('key:ArrowRight', 1);
+    run(g, 5);
+    expect(g.human.x + g.human.w).toBe(PLAY_W);
   });
 
-  it('saves a new high score and flags it on the game-over screen', () => {
-    let best = 50;
-    const store: HighScoreLike = {
-      get best() {
-        return best;
-      },
-      submit(score: number) {
-        if (score > best) {
-          best = score;
-          return true;
-        }
-        return false;
-      },
-    };
-    const g = newGame(store);
-    drop(g, 'robot');
-    loseAllLives(g);
-    expect(g.newHighScore).toBe(true);
-    expect(g.best).toBe(200);
+  it('ignores invalid dt and unknown inputUp without throwing', () => {
+    const g = playing();
+    const t = g.phaseTime;
+    expect(() => {
+      g.update(Number.NaN);
+      g.update(-1);
+      g.update(0);
+      g.update(Number.POSITIVE_INFINITY);
+      g.inputUp('nope');
+    }).not.toThrow();
+    expect(g.phaseTime).toBe(t);
   });
 
-  it('does not flag a score that does not beat the high score', () => {
-    const store: HighScoreLike = { best: 9999, submit: () => false };
-    const g = newGame(store);
-    drop(g, 'llm');
+  it('view returns the same object typed as GameView', () => {
+    const g = newGame();
+    const v: GameView = g.view;
+    expect(v).toBe(g);
+  });
+
+  it('has best 0 and no high-score flag when no store is injected', () => {
+    const g = playing();
+    expect(g.best).toBe(0);
     loseAllLives(g);
     expect(g.newHighScore).toBe(false);
+  });
+});
+
+describe('long simulated run (value ranges)', () => {
+  it('keeps every value in range over 20000 steps with random input', () => {
+    let seed = 12345;
+    const lcg = (): number => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      return seed / 4294967296;
+    };
+    const g = new GameState({ random: lcg, highScore: fakeStore() });
+    let held = false;
+    for (let i = 0; i < 20000; i++) {
+      if (i % 45 === 0) {
+        if (held) g.inputUp('k');
+        g.inputDown('k', lcg() < 0.5 ? -1 : 1);
+        held = true;
+      }
+      if (g.phase === 'title' || g.canReturnToTitle) g.pressStart();
+      g.update(STEP);
+      g.drainEvents();
+      expect(g.score).toBeGreaterThanOrEqual(0);
+      expect(g.lives).toBeGreaterThanOrEqual(0);
+      expect(g.lives).toBeLessThanOrEqual(START_LIVES);
+      expect([0, 25, 50, 75, 100]).toContain(g.aiRestoration);
+      expect(g.caught).toBeLessThanOrEqual(g.stage.requiredCount);
+      expect(g.human.x).toBeGreaterThanOrEqual(0);
+      expect(g.human.x + g.human.w).toBeLessThanOrEqual(PLAY_W);
+      expect(g.objects.length).toBeLessThanOrEqual(6);
+    }
   });
 });

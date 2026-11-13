@@ -1,37 +1,23 @@
-import {
-  BASE_SPAWN_INTERVAL,
-  DIFFICULTY_STEP_SECONDS,
-  INTERVAL_FACTOR,
-  MAX_SPEED_MULTIPLIER,
-  MIN_SPAWN_INTERVAL,
-  SPEED_FACTOR,
-  VIRUS_MAX_SHARE,
-  VIRUS_SHARE_STEP,
-  VIRUS_START_SHARE,
-  VIRUS_START_TIME,
-} from './config';
+import { DIFFICULTY_STEPS_TO_CAP, DIFFICULTY_STEP_SECONDS, EPS } from './config';
+import type { DifficultyValues, StageDefinition } from './types';
 
-/** Number of whole 15 s difficulty steps completed after `t` seconds of play. */
-function steps(t: number): number {
-  if (!Number.isFinite(t) || t <= 0) return 0;
-  return Math.floor(t / DIFFICULTY_STEP_SECONDS);
+function lerp(start: number, cap: number, f: number): number {
+  return f >= 1 ? cap : start + (cap - start) * f;
 }
 
-/** Seconds between new objects after `t` seconds of play (FR3.5, FR3.6). */
-export function spawnInterval(t: number): number {
-  const v = BASE_SPAWN_INTERVAL * Math.pow(INTERVAL_FACTOR, steps(t));
-  return Math.max(MIN_SPAWN_INTERVAL, v);
-}
-
-/** Fall speed multiplier after `t` seconds of play (FR3.5). */
-export function speedMultiplier(t: number): number {
-  const v = Math.pow(SPEED_FACTOR, steps(t));
-  return Math.min(MAX_SPEED_MULTIPLIER, v);
-}
-
-/** Probability that a new object is a VIRUS after `t` seconds of play (FR3.7). */
-export function virusShare(t: number): number {
-  if (!Number.isFinite(t) || t < VIRUS_START_TIME) return 0;
-  const n = Math.floor((t - VIRUS_START_TIME) / DIFFICULTY_STEP_SECONDS);
-  return Math.min(VIRUS_MAX_SHARE, VIRUS_START_SHARE + VIRUS_SHARE_STEP * n);
+/**
+ * Difficulty of a stage after `stageTime` seconds of play (BR5.1): equal steps from the
+ * start values to the cap. An invalid time gives the start values.
+ */
+export function difficultyAt(stage: StageDefinition, stageTime: number): DifficultyValues {
+  const { difficultyStart: a, difficultyCap: b } = stage;
+  const valid = Number.isFinite(stageTime) && stageTime > 0;
+  const n = valid ? Math.floor((stageTime + EPS) / DIFFICULTY_STEP_SECONDS) : 0;
+  const f = Math.min(n, DIFFICULTY_STEPS_TO_CAP) / DIFFICULTY_STEPS_TO_CAP;
+  return {
+    fallSpeedMultiplier: lerp(a.fallSpeedMultiplier, b.fallSpeedMultiplier, f),
+    spawnInterval: lerp(a.spawnInterval, b.spawnInterval, f),
+    virusShare: lerp(a.virusShare, b.virusShare, f),
+    maxObjects: Math.floor(lerp(a.maxObjects, b.maxObjects, f) + EPS),
+  };
 }

@@ -1,0 +1,16 @@
+{
+  "stage": "nfr-requirements",
+  "unit": "u4-accessibility",
+  "upstream_ids": ["NFR1","NFR2","NFR3","NFR4","NFR5","NFR6","NFR7","NFR8","NFR9"],
+  "coverage": [
+    { "id": "NFR1", "status": "OK", "target": "NFR1.4" },
+    { "id": "NFR2", "status": "OK", "target": "NFR2.4" },
+    { "id": "NFR3", "status": "N/A", "target": "load time checked by u5-publishing" },
+    { "id": "NFR4", "status": "N/A", "target": "layout delivered by u2-screens-and-art" },
+    { "id": "NFR5", "status": "OK", "target": "NFR5.11, NFR5.12, NFR5.13" },
+    { "id": "NFR6", "status": "N/A", "target": "u4 adds no asset" },
+    { "id": "NFR7", "status": "N/A", "target": "publishing delivered by u5-publishing" },
+    { "id": "NFR8", "status": "OK", "target": "NFR8.20, NFR8.21, NFR8.22, NFR8.23" },
+    { "id": "NFR9", "status": "N/A", "target": "LCD readability delivered by u2-screens-and-art" }
+  ]
+}

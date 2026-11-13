@@ -1,0 +1,11 @@
+{
+  "stage": "code-generation",
+  "unit": "u3-sound",
+  "version": 1,
+  "writes": [
+    { "path": "src/audio/sound.ts" },
+    { "path": "src/main.ts" },
+    { "path": "tests/audio/sound.test.ts" },
+    { "path": "ASSETS.md" }
+  ]
+}

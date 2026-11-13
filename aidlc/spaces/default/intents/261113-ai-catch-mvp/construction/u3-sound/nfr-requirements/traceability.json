@@ -1,0 +1,16 @@
+{
+  "stage": "nfr-requirements",
+  "unit": "u3-sound",
+  "upstream_ids": ["NFR1","NFR2","NFR3","NFR4","NFR5","NFR6","NFR7","NFR8","NFR9"],
+  "coverage": [
+    { "id": "NFR1", "status": "N/A", "target": "frame rate delivered by u2-screens-and-art and checked by u5-publishing" },
+    { "id": "NFR2", "status": "OK", "target": "NFR2.3" },
+    { "id": "NFR3", "status": "N/A", "target": "load time checked by u5-publishing" },
+    { "id": "NFR4", "status": "N/A", "target": "layout delivered by u2-screens-and-art" },
+    { "id": "NFR5", "status": "OK", "target": "NFR5.7, NFR5.8, NFR5.9, NFR5.10" },
+    { "id": "NFR6", "status": "OK", "target": "NFR6.4" },
+    { "id": "NFR7", "status": "N/A", "target": "publishing delivered by u5-publishing" },
+    { "id": "NFR8", "status": "OK", "target": "NFR8.16, NFR8.17, NFR8.18, NFR8.19" },
+    { "id": "NFR9", "status": "N/A", "target": "LCD readability delivered by u2-screens-and-art" }
+  ]
+}

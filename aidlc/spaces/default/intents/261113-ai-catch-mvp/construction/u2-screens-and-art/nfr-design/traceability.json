@@ -1,0 +1,20 @@
+{
+  "stage": "nfr-design",
+  "unit": "u2-screens-and-art",
+  "upstream_ids": ["NFR1.1","NFR1.2","NFR1.3","NFR2.1","NFR3.1","NFR4.1","NFR9.1","NFR5.3","NFR5.4","NFR5.5","NFR5.6","NFR6.2","NFR6.3"],
+  "coverage": [
+    { "id": "NFR1.1", "status": "OK", "target": "PD-1 single canvas, one clear, current screen only" },
+    { "id": "NFR1.2", "status": "OK", "target": "PD-2 run-length fillRect bitmaps from constant tables" },
+    { "id": "NFR1.3", "status": "OK", "target": "PD-3 pruned effects, bounded glitch and victory noise" },
+    { "id": "NFR2.1", "status": "OK", "target": "PD-4 string bitmaps, no asset files" },
+    { "id": "NFR3.1", "status": "OK", "target": "PD-5 synchronous Renderer, title on first frame" },
+    { "id": "NFR4.1", "status": "OK", "target": "PD-6 unchanged fitCasing and listeners" },
+    { "id": "NFR9.1", "status": "OK", "target": "PD-7 scale-1 font at casing scale >= 1.17, pixelated rendering" },
+    { "id": "NFR5.3", "status": "OK", "target": "SD2-1 no external resources" },
+    { "id": "NFR5.4", "status": "OK", "target": "SD2-2 static markup, no HTML string writes" },
+    { "id": "NFR5.5", "status": "OK", "target": "SD2-3 GameView-typed Renderer" },
+    { "id": "NFR5.6", "status": "OK", "target": "SD2-4 fallbacks and clamps" },
+    { "id": "NFR6.2", "status": "OK", "target": "SD2-5 ASSETS.md originality record" },
+    { "id": "NFR6.3", "status": "OK", "target": "SD2-6 system monospace font" }
+  ]
+}

@@ -1,6 +1,7 @@
-/** Every tunable number of the game, taken from the requirements (FR1-FR8). */
+/** Every tunable number of the game (FR1-FR8). Starting values, tuned by playtesting. */
+import type { CollectibleKind, ObjectKind, StageDefinition } from './types';
 
-/** Logical play area, in logical pixels (FR9.1, FR9.5). */
+/** Logical play area, in logical pixels. */
 export const PLAY_W = 240;
 export const PLAY_H = 160;
 
@@ -12,42 +13,98 @@ export const HUMAN_H = 20;
 /** HUMAN walking speed in logical pixels per second. */
 export const HUMAN_SPEED = 130;
 
-/** Starting fall time: seconds to fall the full play-area height (FR3.1-FR3.4). */
-export const FALL_TIME = {
+/** Seconds to fall the full play-area height, per kind (BR6.3). */
+export const FALL_TIME: Readonly<Record<ObjectKind, number>> = {
+  mainframe: 4.0,
+  tape: 4.0,
+  floppy: 4.0,
   llm: 4.0,
   robot: 3.5,
   virus: 3.0,
   gpu: 2.5,
-} as const;
+};
 
-/** Points per rescue object (FR4.1-FR4.3). */
-export const POINTS = {
+/** Points per collectible (BR3.1). */
+export const POINTS: Readonly<Record<CollectibleKind, number>> = {
+  mainframe: 100,
+  tape: 100,
+  floppy: 100,
   llm: 100,
   gpu: 150,
   robot: 200,
-} as const;
+};
 
 export const START_LIVES = 3;
 
-/** Difficulty (FR3.5-FR3.7, assumption A2). */
-export const BASE_SPAWN_INTERVAL = 1.2;
-export const DIFFICULTY_STEP_SECONDS = 15;
-export const INTERVAL_FACTOR = 0.9;
-export const SPEED_FACTOR = 1.1;
-export const MIN_SPAWN_INTERVAL = 0.6;
-export const MAX_SPEED_MULTIPLIER = 2.0;
-
-/** VIRUS ramp (FR3.7). */
-export const VIRUS_START_TIME = 10;
-export const VIRUS_START_SHARE = 0.2;
-export const VIRUS_SHARE_STEP = 0.05;
-export const VIRUS_MAX_SHARE = 0.4;
-
-/** Sequences, in seconds (FR7.1, FR7.7). */
-export const STARTUP_DURATION = 2.0;
+/** Phase durations in seconds (contract C1). */
+export const STAGE_INTRO_DURATION = 2.0;
+export const STAGE_CLEAR_DURATION = 2.5;
+export const VICTORY_DURATION = 3.5;
 export const GAME_OVER_DURATION = 2.0;
 
-/** ROBOT sway and VIRUS jitter shapes (open design question: chosen here). */
+/** Display sub-steps inside the phase durations (U2 drawing only). The hold step starts at VICTORY_DURATION. */
+export const VICTORY_REBOOT_END = 1.5;
+export const VICTORY_RESTORE_END = 2.5;
+export const VICTORY_MESSAGE_STEP = 0.33;
+/** Seconds the stage-clear AI bar takes to fill. */
+export const CLEAR_BAR_FILL = 1.0;
+/** Blinks per second of "PRESS START" style prompts. */
+export const BLINK_HZ = 1;
+
+/** AI restoration gained per cleared stage, in percent (BR2.4). */
+export const AI_RESTORATION_STEP = 25;
+
+/** In-stage difficulty steps (BR5.1). */
+export const DIFFICULTY_STEP_SECONDS = 8;
+export const DIFFICULTY_STEPS_TO_CAP = 4;
+
+/** Floating-point tolerance for timer and step boundaries (BR1.10). */
+export const EPS = 1e-9;
+
+/** Upper bound of spawns in one update, so a huge dt cannot loop for long (BR6.1). */
+export const MAX_SPAWNS_PER_UPDATE = 100;
+
+/** The four stages in play order (BR2.1, BR5.3, BR5.4). */
+export const STAGES: ReadonlyArray<StageDefinition> = [
+  {
+    stageNumber: 1,
+    name: 'FORTRAN',
+    collectibles: ['mainframe'],
+    requiredCount: 10,
+    difficultyStart: { fallSpeedMultiplier: 1.0, spawnInterval: 1.2, virusShare: 0.1, maxObjects: 3 },
+    difficultyCap: { fallSpeedMultiplier: 1.2, spawnInterval: 1.0, virusShare: 0.15, maxObjects: 4 },
+    clearBonus: 500,
+  },
+  {
+    stageNumber: 2,
+    name: 'COBOL',
+    collectibles: ['tape'],
+    requiredCount: 12,
+    difficultyStart: { fallSpeedMultiplier: 1.1, spawnInterval: 1.1, virusShare: 0.15, maxObjects: 4 },
+    difficultyCap: { fallSpeedMultiplier: 1.35, spawnInterval: 0.9, virusShare: 0.22, maxObjects: 5 },
+    clearBonus: 500,
+  },
+  {
+    stageNumber: 3,
+    name: 'BASIC',
+    collectibles: ['floppy'],
+    requiredCount: 14,
+    difficultyStart: { fallSpeedMultiplier: 1.2, spawnInterval: 1.0, virusShare: 0.2, maxObjects: 4 },
+    difficultyCap: { fallSpeedMultiplier: 1.5, spawnInterval: 0.8, virusShare: 0.28, maxObjects: 5 },
+    clearBonus: 500,
+  },
+  {
+    stageNumber: 4,
+    name: 'LLM',
+    collectibles: ['llm', 'gpu', 'robot'],
+    requiredCount: 16,
+    difficultyStart: { fallSpeedMultiplier: 1.3, spawnInterval: 0.9, virusShare: 0.25, maxObjects: 5 },
+    difficultyCap: { fallSpeedMultiplier: 1.7, spawnInterval: 0.7, virusShare: 0.35, maxObjects: 6 },
+    clearBonus: 500,
+  },
+];
+
+/** ROBOT sway and VIRUS jitter shapes. */
 export const ROBOT_SWAY_AMPLITUDE = 22;
 export const ROBOT_SWAY_PERIOD = 1.6;
 export const VIRUS_JITTER_AMPLITUDE = 16;

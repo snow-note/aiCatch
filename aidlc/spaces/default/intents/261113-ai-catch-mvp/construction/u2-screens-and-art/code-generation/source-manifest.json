@@ -1,0 +1,17 @@
+{
+  "stage": "code-generation",
+  "unit": "u2-screens-and-art",
+  "version": 1,
+  "writes": [
+    { "path": "index.html" },
+    { "path": "src/style.css" },
+    { "path": "src/render/renderer.ts" },
+    { "path": "src/render/sprites.ts" },
+    { "path": "src/render/screen-timing.ts" },
+    { "path": "src/game/config.ts" },
+    { "path": "tests/render/sprites.test.ts" },
+    { "path": "tests/render/screen-timing.test.ts" },
+    { "path": "tests/render/renderer.test.ts" },
+    { "path": "ASSETS.md" }
+  ]
+}
