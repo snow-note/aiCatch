@@ -27,7 +27,7 @@ describe('difficultyAt (BR5.1)', () => {
     const d = difficultyAt(stage1, 17);
     expect(d.fallSpeedMultiplier).toBeCloseTo(1.1, 10);
     expect(d.spawnInterval).toBeCloseTo(1.1, 10);
-    expect(d.virusShare).toBeCloseTo(0.125, 10);
+    expect(d.virusShare).toBeCloseTo(0.425, 10);
     expect(d.maxObjects).toBe(3);
   });
 

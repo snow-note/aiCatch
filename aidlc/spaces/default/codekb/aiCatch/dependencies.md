@@ -1,47 +1,33 @@
 # Dependencies
 
-## External (npm)
-Runtime dependencies: none.
-
-Dev dependencies (exact pins, `package.json`):
+## External (npm, all devDependencies; no runtime dependencies)
 | Package | Version | Purpose |
 |---|---|---|
-| typescript | 7.0.2 | type check (`tsc --noEmit`) |
 | vite | 8.3.7 | dev server and production build |
+| typescript | 7.0.2 | type check (`tsc --noEmit`) |
 | vitest | 5.1.0 | unit tests |
+| @vitest/coverage-v8 | 5.1.0 | line coverage (80% threshold) |
 
-`package-lock.json` exists but was not opened. Transitive dependencies were not enumerated. No audit was run.
+Versions are exact pins in `package.json`; `package-lock.json` is present (not read in detail).
 
-## External (browser platform)
-Canvas 2D, Web Audio (`AudioContext`, `webkitAudioContext` fallback), `localStorage`, Pointer Events, Keyboard Events, `visualViewport`, `requestAnimationFrame`.
+## External (CI)
+- `actions/checkout@v7`, `actions/setup-node@v7` (`.github/workflows/ci.yml`).
 
-## External (Python tooling)
-Standard library only (`argparse`, `csv`, `json`, `os`, `socket`, `datetime`, `pathlib`, `subprocess`, `re`). Reads Kiro session logs from `~/.kiro/sessions` (override `KIRO_SESSIONS_DIR`).
-
-## Internal module dependencies
-```mermaid
-flowchart LR
-  main --> state
-  main --> renderer
-  main --> sound
-  main --> highscore
-  main --> layout
-  state --> collision
-  state --> config
-  state --> difficulty
-  state --> input
-  state --> objects
-  state --> spawner
-  spawner --> difficulty
-  spawner --> objects
-  spawner --> config
-  difficulty --> config
-  objects --> config
-  renderer --> config
-  renderer --> sprites
-  renderer -. type only .-> state
+## Internal module imports (src/)
 ```
+main.ts        -> audio/sound, game/announcer, game/highscore, game/state, render/layout, render/renderer, style.css
+game/state     -> collision, config, difficulty, input, objects, run, spawner, types
+game/spawner   -> config, objects, types
+game/objects   -> config, types
+game/difficulty-> config, types
+game/run       -> config, types
+game/announcer -> types
+render/renderer-> game/config, game/types, render/sprites, render/screen-timing
+render/screen-timing -> game/config, game/types
+audio/sound    -> game/types
+```
+- No circular imports found in the files read. `src/game/` imports nothing from `render/` or `audio/` (logic/rendering separation).
+- `src/render/` imports constants from `src/game/config.ts` (OBJECT_W/H, PLAY_W/H, START_LIVES, timings).
 
-Text fallback: `main` imports `state`, `renderer`, `sound`, `highscore`, `layout`. `state` imports `collision`, `config`, `difficulty`, `input`, `objects`, `spawner`. `spawner` imports `difficulty`, `objects`, `config`. `difficulty` and `objects` import `config`. `renderer` imports `config`, `sprites`, and the `GameState` type only. `collision`, `input`, `highscore`, `sprites`, `layout`, and `sound` import nothing internal.
-
-No circular imports were seen. Tests import from `src/` only.
+## Python scripts
+- `scripts/aidlc_stage_usage_hook.py` -> `scripts/aidlc_usage.py` (subprocess); `scripts/aidlc_hook_event.py` writes `.usage/hook-events.jsonl`. Python stdlib only.
