@@ -10,6 +10,8 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       reporter: ['text', 'json-summary'],
       reportsDirectory: 'coverage',
+      // mvp floor: the run fails below 80% line coverage (CI Pipeline, Q2).
+      thresholds: { lines: 80 },
     },
   },
 });
