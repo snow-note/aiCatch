@@ -123,12 +123,12 @@ describe('Renderer.draw per phase', () => {
     }
   });
 
-  it.each([0.5, 2.0, 3.0, 4.0])('draws victory at %s s', (phaseTime) => {
+  it.each([0.5, 2.0, 3.0, 10, 22, 25])('draws victory at %s s', (phaseTime) => {
     drawAndCheck(view('victory', { phaseTime, stageIndex: 3, aiRestoration: 100 }));
   });
 
   it('draws the victory hold with new high score and return prompt in both blink states', () => {
-    for (const phaseTime of [4.0, 4.6]) {
+    for (const phaseTime of [22.5, 23.1]) {
       drawAndCheck(
         view('victory', { phaseTime, stageIndex: 3, aiRestoration: 100, newHighScore: true, canReturnToTitle: true }),
       );

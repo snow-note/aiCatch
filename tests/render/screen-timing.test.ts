@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { STAGES } from '../../src/game/config';
+import { ENDING_TYPE_SHARE, STAGES, VICTORY_DURATION, VICTORY_RESTORE_END } from '../../src/game/config';
+import { ENDING_LINES } from '../../src/render/ending';
 import {
   barFill,
   blinkOn,
   timerText,
   timerVisible,
   hudTexts,
-  messagesShown,
+  endingView,
   noiseLines,
   reachedLine,
   victoryBarFill,
+  endingDuration,
   victoryStep,
 } from '../../src/render/screen-timing';
 
@@ -22,9 +24,10 @@ describe('victoryStep', () => {
     [1.5, 'restore'],
     [2.49, 'restore'],
     [2.5, 'messages'],
-    [3.49, 'messages'],
-    [3.5, 'hold'],
-    [10, 'hold'],
+    [3.5, 'messages'],
+    [22.29, 'messages'],
+    [22.3, 'hold'],
+    [30, 'hold'],
   ])('t=%s is %s', (t, step) => {
     expect(victoryStep(t)).toBe(step);
   });
@@ -36,27 +39,42 @@ describe('victoryStep', () => {
   });
 });
 
-describe('messagesShown', () => {
-  it('is 0 before 2.5 s', () => {
-    expect(messagesShown(0)).toBe(0);
-    expect(messagesShown(2.49)).toBe(0);
+describe('endingView', () => {
+  const W = 12;
+  const at = (t: number) => endingView(t, ENDING_LINES, W);
+  it('shows nothing before the message starts', () => {
+    expect(endingView(0, ENDING_LINES, W).visible).toEqual([]);
+    expect(endingView(Number.NaN, ENDING_LINES, W).visible).toEqual([]);
   });
-
-  it('shows 1, 2, 3 messages in 0.33 s steps', () => {
-    expect(messagesShown(2.5)).toBe(1);
-    expect(messagesShown(2.82)).toBe(1);
-    expect(messagesShown(2.83)).toBe(2);
-    expect(messagesShown(3.15)).toBe(2);
-    expect(messagesShown(3.16)).toBe(3);
+  it('types the first line partly, then in full, then reveals the next one', () => {
+    const early = at(0.01).visible;
+    expect(early).toHaveLength(1);
+    expect(early[0]!.length).toBeGreaterThan(0);
+    expect(early[0]!.length).toBeLessThan(ENDING_LINES[0]!.length);
+    expect(at(1.2 * ENDING_TYPE_SHARE + 0.01).visible).toEqual([ENDING_LINES[0]]);
+    expect(at(1.2 + 0.01).visible).toHaveLength(2);
   });
-
-  it('never exceeds 3 and is 0 for bad time', () => {
-    expect(messagesShown(100)).toBe(3);
-    expect(messagesShown(Number.NaN)).toBe(0);
-    expect(messagesShown(-5)).toBe(0);
+  it('counts blank lines as lines', () => {
+    expect(at(1.2 + 0.7 - 0.01).visible).toEqual([ENDING_LINES[0], '']);
+    expect(at(1.2 + 0.7 + 0.01).visible).toHaveLength(3);
+  });
+  it('never shows more than the window and keeps the newest line last', () => {
+    for (let t = 0; t <= 21; t += 0.25) {
+      const v = at(t);
+      expect(v.visible.length).toBeLessThanOrEqual(W);
+      if (v.visible.length > 0) {
+        const last = ENDING_LINES[v.first + v.visible.length - 1]!;
+        expect(last.startsWith(v.visible[v.visible.length - 1]!)).toBe(true);
+      }
+    }
+  });
+  it('ends with the last window of lines in full', () => {
+    const v = at(endingDuration(ENDING_LINES));
+    expect(v.visible).toEqual(ENDING_LINES.slice(-W));
+    expect(endingView(1000, ENDING_LINES, W).visible).toEqual(ENDING_LINES.slice(-W));
+    expect(VICTORY_DURATION).toBeGreaterThan(VICTORY_RESTORE_END);
   });
 });
-
 describe('barFill', () => {
   it('fills 25 points over 1.0 s ending at the restoration', () => {
     expect(barFill(0, 25)).toBe(0);

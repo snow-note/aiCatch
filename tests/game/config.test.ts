@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   AI_RESTORATION_STEP,
+  ENDING_BLANK_STEP,
+  ENDING_LINE_STEP,
+  ENDING_TYPE_SHARE,
   EPS,
   FALL_TIME,
   FIRST_SPAWN_DELAY,
@@ -22,7 +25,10 @@ import {
   TIME_BONUS_PER_SECOND,
   TIME_WARNING_SECONDS,
   VICTORY_DURATION,
+  VICTORY_RESTORE_END,
 } from '../../src/game/config';
+import { ENDING_LINES } from '../../src/render/ending';
+import { endingDuration } from '../../src/render/screen-timing';
 import type { DifficultyValues, ObjectKind } from '../../src/game/types';
 
 const COLLECTIBLES: ObjectKind[] = ['mainframe', 'tape', 'floppy', 'llm', 'gpu', 'robot'];
@@ -168,8 +174,20 @@ describe('tables and durations', () => {
   it('phase durations match contract C1', () => {
     expect(STAGE_INTRO_DURATION).toBe(2.0);
     expect(STAGE_CLEAR_DURATION).toBe(2.5);
-    expect(VICTORY_DURATION).toBe(3.5);
+    expect(VICTORY_DURATION).toBe(22.3);
     expect(GAME_OVER_DURATION).toBe(2.0);
     expect(EPS).toBe(1e-9);
+  });
+});
+
+describe('ending message timing (FR2.3, FR3.3, NFR4)', () => {
+  it('pins the ending tunables', () => {
+    expect(ENDING_LINE_STEP).toBe(1.2);
+    expect(ENDING_BLANK_STEP).toBe(0.7);
+    expect(ENDING_TYPE_SHARE).toBe(0.6);
+  });
+
+  it('ends the victory phase when the message is complete', () => {
+    expect(VICTORY_DURATION).toBeCloseTo(VICTORY_RESTORE_END + endingDuration(ENDING_LINES), 9);
   });
 });
