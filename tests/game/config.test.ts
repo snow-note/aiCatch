@@ -3,8 +3,18 @@ import {
   AI_RESTORATION_STEP,
   EPS,
   FALL_TIME,
+  FIRST_SPAWN_DELAY,
   GAME_OVER_DURATION,
+  HUMAN_H,
+  HUMAN_SPEED,
+  HUMAN_W,
+  OBJECT_H,
+  OBJECT_W,
+  PLAY_H,
   POINTS,
+  VIRUS_AIM_SHARE,
+  VIRUS_AIM_SPREAD,
+  VIRUS_JITTER_AMPLITUDE,
   STAGES,
   STAGE_CLEAR_DURATION,
   STAGE_INTRO_DURATION,
@@ -80,15 +90,32 @@ describe('stage difficulty (BR5.3, BR5.4)', () => {
     expect(STAGES[0]!.difficultyStart).toEqual({
       fallSpeedMultiplier: 1.0,
       spawnInterval: 1.2,
-      virusShare: 0.1,
+      virusShare: 0.4,
       maxObjects: 3,
     });
     expect(STAGES[0]!.difficultyCap).toEqual({
       fallSpeedMultiplier: 1.2,
       spawnInterval: 1.0,
-      virusShare: 0.15,
+      virusShare: 0.45,
       maxObjects: 4,
     });
+  });
+
+  it('has the early-heart-loss tunables (FR2.2, FR3.1, FR3.2)', () => {
+    expect(FIRST_SPAWN_DELAY).toBe(0.5);
+    expect(VIRUS_AIM_SHARE).toBeCloseTo(1 / 3, 10);
+    expect(VIRUS_AIM_SPREAD).toBe(HUMAN_W);
+    expect(FALL_TIME.virus).toBe(2.2);
+  });
+
+  it('gives a VIRUS at least 1.5 s to reach HUMAN at Stage 1 start, enough to step aside (NFR2)', () => {
+    const mult = STAGES[0]!.difficultyStart.fallSpeedMultiplier;
+    const vy = (PLAY_H / FALL_TIME.virus) * mult;
+    // First possible contact: the object bottom reaches the top of HUMAN.
+    const contactTime = (PLAY_H - HUMAN_H - OBJECT_H) / vy;
+    expect(contactTime).toBeGreaterThanOrEqual(1.5);
+    const overlapZone = HUMAN_W + OBJECT_W + 2 * VIRUS_JITTER_AMPLITUDE;
+    expect(HUMAN_SPEED * contactTime).toBeGreaterThanOrEqual(overlapZone);
   });
 });
 

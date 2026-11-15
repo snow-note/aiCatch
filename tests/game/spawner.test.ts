@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { OBJECT_W, PLAY_H, PLAY_W, STAGES } from '../../src/game/config';
+import { OBJECT_W, PLAY_H, PLAY_W, STAGES, VIRUS_AIM_SHARE, VIRUS_AIM_SPREAD } from '../../src/game/config';
 import { pickKind, spawnObject } from '../../src/game/spawner';
 import type { CollectibleKind } from '../../src/game/types';
 
@@ -69,5 +69,50 @@ describe('spawnObject (BR6.3)', () => {
     const o = spawnObject(['mainframe'], d, 7, scripted([0.0, 0.5, 0]));
     expect(o.kind).toBe('virus');
     expect(o.order).toBe(7);
+  });
+});
+
+describe('aimed VIRUS spawn (FR3.1-FR3.3)', () => {
+  const d = STAGES[0]!.difficultyStart;
+  const maxX = PLAY_W - OBJECT_W;
+  // Draws: kind (virus), aim decision (aimed), spread, phase.
+  const aimedAt = (aimX: number, spread: number) =>
+    spawnObject(['mainframe'], d, 0, scripted([0, VIRUS_AIM_SHARE / 2, spread, 0]), aimX);
+
+  it('puts an aimed VIRUS within the spread of the aim x', () => {
+    const centre = aimedAt(120, 0.5);
+    expect(centre.x).toBeCloseTo(120 - OBJECT_W / 2, 8);
+    const left = aimedAt(120, 0);
+    expect(left.x).toBeCloseTo(120 - OBJECT_W / 2 - VIRUS_AIM_SPREAD, 8);
+    const right = aimedAt(120, 1);
+    expect(right.x).toBeCloseTo(120 - OBJECT_W / 2 + VIRUS_AIM_SPREAD, 8);
+  });
+
+  it('clamps an aimed VIRUS to the play area at both edges', () => {
+    expect(aimedAt(0, 0).x).toBe(0);
+    expect(aimedAt(PLAY_W, 1).x).toBe(maxX);
+  });
+
+  it('lands exactly on the aim when the spread is zero', () => {
+    // A zero spread is the mid draw of a symmetric range: random() = 0.5 gives no offset.
+    expect(aimedAt(100, 0.5).x).toBeCloseTo(100 - OBJECT_W / 2, 8);
+  });
+
+  it('keeps a random x when the aim decision fails', () => {
+    const o = spawnObject(['mainframe'], d, 0, scripted([0, VIRUS_AIM_SHARE, 0.5, 0]), 10);
+    expect(o.kind).toBe('virus');
+    expect(o.x).toBeCloseTo(0.5 * maxX, 8);
+  });
+
+  it('keeps a random x for a collectible even with an aim x', () => {
+    const o = spawnObject(['mainframe'], d, 0, scripted([0.9, 0.5, 0.25, 0]), 200);
+    expect(o.kind).toBe('mainframe');
+    expect(o.x).toBeCloseTo(0.25 * maxX, 8);
+  });
+
+  it('keeps today\'s behaviour without an aim x', () => {
+    const o = spawnObject(['mainframe'], d, 0, scripted([0, 0.25, 0]));
+    expect(o.kind).toBe('virus');
+    expect(o.x).toBeCloseTo(0.25 * maxX, 8);
   });
 });

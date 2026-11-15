@@ -20,7 +20,7 @@ export const FALL_TIME: Readonly<Record<ObjectKind, number>> = {
   floppy: 4.0,
   llm: 4.0,
   robot: 3.5,
-  virus: 3.0,
+  virus: 2.2,
   gpu: 2.5,
 };
 
@@ -71,8 +71,8 @@ export const STAGES: ReadonlyArray<StageDefinition> = [
     name: 'FORTRAN',
     collectibles: ['mainframe'],
     requiredCount: 10,
-    difficultyStart: { fallSpeedMultiplier: 1.0, spawnInterval: 1.2, virusShare: 0.1, maxObjects: 3 },
-    difficultyCap: { fallSpeedMultiplier: 1.2, spawnInterval: 1.0, virusShare: 0.15, maxObjects: 4 },
+    difficultyStart: { fallSpeedMultiplier: 1.0, spawnInterval: 1.2, virusShare: 0.4, maxObjects: 3 },
+    difficultyCap: { fallSpeedMultiplier: 1.2, spawnInterval: 1.0, virusShare: 0.45, maxObjects: 4 },
     clearBonus: 500,
   },
   {
@@ -80,8 +80,8 @@ export const STAGES: ReadonlyArray<StageDefinition> = [
     name: 'COBOL',
     collectibles: ['tape'],
     requiredCount: 12,
-    difficultyStart: { fallSpeedMultiplier: 1.1, spawnInterval: 1.1, virusShare: 0.15, maxObjects: 4 },
-    difficultyCap: { fallSpeedMultiplier: 1.35, spawnInterval: 0.9, virusShare: 0.22, maxObjects: 5 },
+    difficultyStart: { fallSpeedMultiplier: 1.1, spawnInterval: 1.1, virusShare: 0.45, maxObjects: 4 },
+    difficultyCap: { fallSpeedMultiplier: 1.35, spawnInterval: 0.9, virusShare: 0.5, maxObjects: 5 },
     clearBonus: 500,
   },
   {
@@ -89,8 +89,8 @@ export const STAGES: ReadonlyArray<StageDefinition> = [
     name: 'BASIC',
     collectibles: ['floppy'],
     requiredCount: 14,
-    difficultyStart: { fallSpeedMultiplier: 1.2, spawnInterval: 1.0, virusShare: 0.2, maxObjects: 4 },
-    difficultyCap: { fallSpeedMultiplier: 1.5, spawnInterval: 0.8, virusShare: 0.28, maxObjects: 5 },
+    difficultyStart: { fallSpeedMultiplier: 1.2, spawnInterval: 1.0, virusShare: 0.5, maxObjects: 4 },
+    difficultyCap: { fallSpeedMultiplier: 1.5, spawnInterval: 0.8, virusShare: 0.55, maxObjects: 5 },
     clearBonus: 500,
   },
   {
@@ -98,11 +98,18 @@ export const STAGES: ReadonlyArray<StageDefinition> = [
     name: 'LLM',
     collectibles: ['llm', 'gpu', 'robot'],
     requiredCount: 16,
-    difficultyStart: { fallSpeedMultiplier: 1.3, spawnInterval: 0.9, virusShare: 0.25, maxObjects: 5 },
-    difficultyCap: { fallSpeedMultiplier: 1.7, spawnInterval: 0.7, virusShare: 0.35, maxObjects: 6 },
+    difficultyStart: { fallSpeedMultiplier: 1.3, spawnInterval: 0.9, virusShare: 0.55, maxObjects: 5 },
+    difficultyCap: { fallSpeedMultiplier: 1.7, spawnInterval: 0.7, virusShare: 0.6, maxObjects: 6 },
     clearBonus: 500,
   },
 ];
+
+/** Seconds of play before the first object of every stage appears (FR2.2). */
+export const FIRST_SPAWN_DELAY = 0.5;
+/** Share of VIRUS spawns aimed at HUMAN's position at spawn time (FR3.1). */
+export const VIRUS_AIM_SHARE = 1 / 3;
+/** Sideways spread, in logical pixels, around the aim point of an aimed VIRUS (FR3.2). */
+export const VIRUS_AIM_SPREAD = HUMAN_W;
 
 /** ROBOT sway and VIRUS jitter shapes. */
 export const ROBOT_SWAY_AMPLITUDE = 22;

@@ -1,0 +1,26 @@
+{
+  "stage": "code-generation",
+  "upstream_ids": ["FR1.1","FR1.2","FR1.3","FR1.4","FR2.1","FR2.2","FR2.3","FR2.4","FR3.1","FR3.2","FR3.3","FR4.1","FR5.1","FR6.1","NFR1","NFR2","NFR3","NFR4","NFR5","NFR6"],
+  "coverage": [
+    { "id": "FR1.1", "status": "OK", "target": "tests/game/first-heart.test.ts" },
+    { "id": "FR1.2", "status": "OK", "target": "tests/game/first-heart.test.ts" },
+    { "id": "FR1.3", "status": "OK", "target": "tests/game/first-heart.test.ts" },
+    { "id": "FR1.4", "status": "N/A", "target": "developer play check, recorded in Build and Test" },
+    { "id": "FR2.1", "status": "OK", "target": "src/game/config.ts" },
+    { "id": "FR2.2", "status": "OK", "target": "src/game/state.ts" },
+    { "id": "FR2.3", "status": "OK", "target": "src/game/config.ts" },
+    { "id": "FR2.4", "status": "OK", "target": "tests/game/config.test.ts" },
+    { "id": "FR3.1", "status": "OK", "target": "src/game/spawner.ts" },
+    { "id": "FR3.2", "status": "OK", "target": "tests/game/spawner.test.ts" },
+    { "id": "FR3.3", "status": "OK", "target": "tests/game/spawner.test.ts" },
+    { "id": "FR4.1", "status": "OK", "target": "tests/game/state.test.ts" },
+    { "id": "FR5.1", "status": "OK", "target": "tests/game/state.test.ts" },
+    { "id": "FR6.1", "status": "OK", "target": "tests/game/state.test.ts" },
+    { "id": "NFR1", "status": "OK", "target": "tests/game/first-heart.test.ts" },
+    { "id": "NFR2", "status": "OK", "target": "tests/game/config.test.ts" },
+    { "id": "NFR3", "status": "OK", "target": "tests/game/spawner.test.ts" },
+    { "id": "NFR4", "status": "OK", "target": "tests/game/first-heart.test.ts" },
+    { "id": "NFR5", "status": "OK", "target": "package.json" },
+    { "id": "NFR6", "status": "OK", "target": "src/game/config.ts" }
+  ]
+}

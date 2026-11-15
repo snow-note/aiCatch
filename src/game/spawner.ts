@@ -1,4 +1,4 @@
-import { OBJECT_W, PLAY_W } from './config';
+import { OBJECT_W, PLAY_W, VIRUS_AIM_SHARE, VIRUS_AIM_SPREAD } from './config';
 import { createObject, type FallingObject } from './objects';
 import type { CollectibleKind, DifficultyValues, ObjectKind } from './types';
 
@@ -20,15 +20,26 @@ export function pickKind(
   return collectibles[i] ?? 'virus';
 }
 
-/** Creates the next falling object at a random x inside the play area (BR6.3). */
+/**
+ * Creates the next falling object (BR6.3). x is random inside the play area, except that a
+ * VIRUS is aimed at `aimX` (HUMAN's centre) with a share of VIRUS_AIM_SHARE (FR3.1-FR3.3).
+ * Collectibles keep their draw order.
+ */
 export function spawnObject(
   collectibles: ReadonlyArray<CollectibleKind>,
   difficulty: DifficultyValues,
   order: number,
   random: Random,
+  aimX?: number,
 ): FallingObject {
   const kind = pickKind(collectibles, difficulty.virusShare, random);
-  const x = random() * (PLAY_W - OBJECT_W);
+  const aimed = kind === 'virus' && aimX !== undefined && random() < VIRUS_AIM_SHARE;
+  const x = aimed
+    ? Math.min(
+        PLAY_W - OBJECT_W,
+        Math.max(0, (aimX as number) - OBJECT_W / 2 + (random() * 2 - 1) * VIRUS_AIM_SPREAD),
+      )
+    : random() * (PLAY_W - OBJECT_W);
   const phase = random() * Math.PI * 2;
   return createObject(kind, x, order, difficulty.fallSpeedMultiplier, phase);
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  FIRST_SPAWN_DELAY,
   GAME_OVER_DURATION,
   HUMAN_SPEED,
   PLAY_H,
@@ -206,11 +207,51 @@ describe('spawning (BR6.1)', () => {
     expect(peak).toBe(max);
   });
 
+  it('spawns the first object at FIRST_SPAWN_DELAY of play, then one interval later (FR2.2)', () => {
+    const g = playing();
+    const interval = STAGES[0]!.difficultyStart.spawnInterval;
+    run(g, FIRST_SPAWN_DELAY - 0.05);
+    expect(g.objects).toHaveLength(0);
+    run(g, 0.1);
+    expect(g.objects).toHaveLength(1);
+    run(g, interval - 0.15);
+    expect(g.objects).toHaveLength(1);
+    run(g, 0.1);
+    expect(g.objects).toHaveLength(2);
+  });
+
+  it('uses the same first-spawn delay at the start of Stage 2 (FR2.2)', () => {
+    const g = playing();
+    clearStageAndAdvance(g);
+    run(g, STAGE_INTRO_DURATION);
+    expect(g.stageIndex).toBe(1);
+    expect(g.objects).toHaveLength(0);
+    run(g, FIRST_SPAWN_DELAY - 0.05);
+    expect(g.objects).toHaveLength(0);
+    run(g, 0.1);
+    expect(g.objects).toHaveLength(1);
+  });
+
   it('stays bounded and finishes with a huge dt', () => {
     const g = playing();
     g.update(1e6);
     expect(g.objects.length).toBeLessThanOrEqual(STAGES[0]!.difficultyCap.maxObjects);
     expect(['playing', 'game-over']).toContain(g.phase);
+  });
+});
+
+describe('lives (FR4.1, FR5.1)', () => {
+  it('a new run has exactly 3 lives', () => {
+    expect(START_LIVES).toBe(3);
+    expect(playing().lives).toBe(3);
+  });
+
+  it('two VIRUS contacts in a row each cost exactly one life (no invulnerability)', () => {
+    const g = playing();
+    drop(g, 'virus');
+    expect(g.lives).toBe(2);
+    drop(g, 'virus');
+    expect(g.lives).toBe(1);
   });
 });
 

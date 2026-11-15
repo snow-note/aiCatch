@@ -1,6 +1,7 @@
 import { resolveCollisions } from './collision';
 import {
   EPS,
+  FIRST_SPAWN_DELAY,
   GAME_OVER_DURATION,
   HUMAN_H,
   HUMAN_SPEED,
@@ -181,7 +182,8 @@ export class GameState implements GameView, GameControls {
     this.phase = 'stage-intro';
     this.phaseTime = 0;
     this.stageTime = 0;
-    this.spawnTimer = 0;
+    // The first spawn comes FIRST_SPAWN_DELAY into play, then every spawn interval (FR2.2).
+    this.spawnTimer = this.stage.difficultyStart.spawnInterval - FIRST_SPAWN_DELAY;
     this.objects = [];
     this.human.x = (PLAY_W - HUMAN_W) / 2;
     this.events.push({ type: 'stage-start', stageIndex: this.run.stageIndex });
@@ -256,7 +258,14 @@ export class GameState implements GameView, GameControls {
     for (let n = 0; n < MAX_SPAWNS_PER_UPDATE && this.spawnTimer >= d.spawnInterval; n++) {
       this.spawnTimer -= d.spawnInterval;
       if (this.objects.length < d.maxObjects) {
-        this.objects.push(spawnObject(stage.collectibles, d, this.nextOrder++, this.random));
+        this.objects.push(spawnObject(
+            stage.collectibles,
+            d,
+            this.nextOrder++,
+            this.random,
+            this.human.x + HUMAN_W / 2,
+          ),
+        );
       }
     }
     // A huge dt must not leave a backlog that bursts out later.
