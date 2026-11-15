@@ -28,7 +28,15 @@
     "slug": "stage-time-limit",
     "dirName": "261115-stage-time-limit",
     "scope": "express",
-    "status": "in-flight",
+    "status": "complete",
     "request": "d33d10cc"
+  },
+  {
+    "uuid": "01a1df0b-35f2-71a8-9198-e921ddad89c5",
+    "slug": "responsive-orientation",
+    "dirName": "261115-responsive-orientation",
+    "scope": "bugfix",
+    "status": "in-flight",
+    "request": "9806e5b8"
   }
 ]

@@ -19,6 +19,9 @@ body {
   inset: 0;
   overflow: hidden;
   background: #1d2b3a;
+  /* Safe-area insets, read back by refit() in main.ts (FR3.2). */
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }
 
 /* Fixed logical size 320 x 240; scaled and centred by script (see layout.ts). */

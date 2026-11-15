@@ -3,7 +3,19 @@ import { SoundPlayer, soundForEvent } from './audio/sound';
 import { screenAnnouncement } from './game/announcer';
 import { HighScoreStore, type StorageLike } from './game/highscore';
 import { GameState } from './game/state';
-import { CASING_H, CASING_W, fitCasing } from './render/layout';
+import {
+  CASING_H,
+  CASING_W,
+  SETTLE_DELAY_MS,
+  chooseFit,
+  fitArea,
+  orientationOf,
+  placeCasing,
+  touchSide,
+  type Fit,
+  type Insets,
+  type ViewportRect,
+} from './render/layout';
 import { Renderer } from './render/renderer';
 
 const STEP = 1 / 60;
@@ -34,19 +46,64 @@ function start(): void {
   const state = new GameState({ highScore: new HighScoreStore(getStorage()) });
 
   // ---- fit the casing to the visible area (FR9.5, FR9.6) -------------------
-  const refit = (): void => {
+  const stageEl = el<HTMLElement>('stage');
+  let lastFit: Fit | null = null;
+  let lastArea: ViewportRect | null = null;
+  let lastOrientation: 'portrait' | 'landscape' | null = null;
+
+  const readViewport = (): ViewportRect => {
     const vv = window.visualViewport;
-    const w = vv?.width ?? window.innerWidth;
-    const h = vv?.height ?? window.innerHeight;
-    const fit = fitCasing(w, h);
+    if (vv && vv.width > 0 && vv.height > 0) {
+      return { x: vv.offsetLeft, y: vv.offsetTop, width: vv.width, height: vv.height };
+    }
+    return { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
+  };
+
+  const readInsets = (): Insets => {
+    const cs = getComputedStyle(stageEl);
+    return {
+      top: parseFloat(cs.paddingTop),
+      right: parseFloat(cs.paddingRight),
+      bottom: parseFloat(cs.paddingBottom),
+      left: parseFloat(cs.paddingLeft),
+    };
+  };
+
+  const refit = (): void => {
+    const viewport = readViewport();
+    // Release held input only when portrait/landscape flips (FR5.1). A transient
+    // empty size says nothing about orientation, so it is ignored here.
+    if (viewport.width > 0 && viewport.height > 0) {
+      const orientation = orientationOf(viewport.width, viewport.height);
+      if (lastOrientation !== null && orientation !== lastOrientation) state.releaseAll();
+      lastOrientation = orientation;
+    }
+
+    const area = fitArea(viewport, readInsets());
+    const fit = chooseFit(placeCasing(area), lastFit); // keep last valid fit (FR2.1)
+    if (!fit) return;
+    if (fit !== lastFit) lastArea = area;
+    lastFit = fit;
     consoleEl.style.width = `${CASING_W}px`;
     consoleEl.style.height = `${CASING_H}px`;
     consoleEl.style.transform = `translate(${fit.offsetX}px, ${fit.offsetY}px) scale(${fit.scale})`;
   };
+
+  // Re-fit now, next frame and after the browser chrome settles (FR1.1, FR1.2).
+  let pendingFrame = 0;
+  let pendingTimer = 0;
+  const scheduleRefit = (): void => {
+    refit();
+    cancelAnimationFrame(pendingFrame);
+    clearTimeout(pendingTimer);
+    pendingFrame = requestAnimationFrame(refit);
+    pendingTimer = window.setTimeout(refit, SETTLE_DELAY_MS);
+  };
   refit();
-  window.addEventListener('resize', refit);
-  window.addEventListener('orientationchange', refit);
-  window.visualViewport?.addEventListener('resize', refit);
+  window.addEventListener('resize', scheduleRefit);
+  window.addEventListener('orientationchange', scheduleRefit);
+  window.visualViewport?.addEventListener('resize', scheduleRefit);
+  window.visualViewport?.addEventListener('scroll', scheduleRefit);
 
   // ---- buttons -------------------------------------------------------------
   startButton.addEventListener('click', () => {
@@ -93,7 +150,7 @@ function start(): void {
         state.inputDown(`mouse:${e.pointerId}`, null);
         return;
       }
-      const dir = e.clientX < window.innerWidth / 2 ? -1 : 1;
+      const dir = touchSide(e.clientX, lastArea ?? readViewport()); // casing centre (FR4.1)
       state.inputDown(`touch:${e.pointerId}`, dir);
     },
     { passive: true },

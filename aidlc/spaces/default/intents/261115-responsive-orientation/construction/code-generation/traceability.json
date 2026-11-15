@@ -1,0 +1,21 @@
+{
+  "stage": "code-generation",
+  "upstream_ids": ["FR1.1","FR1.2","FR2.1","FR2.2","FR3.1","FR3.2","FR3.3","FR4.1","FR5.1","NFR1","NFR2","NFR3","NFR4","NFR5","NFR6"],
+  "coverage": [
+    { "id": "FR1.1", "status": "OK", "target": "src/main.ts" },
+    { "id": "FR1.2", "status": "OK", "target": "src/main.ts" },
+    { "id": "FR2.1", "status": "OK", "target": "src/render/layout.ts" },
+    { "id": "FR2.2", "status": "OK", "target": "tests/render/layout.test.ts" },
+    { "id": "FR3.1", "status": "OK", "target": "src/main.ts" },
+    { "id": "FR3.2", "status": "OK", "target": "src/style.css" },
+    { "id": "FR3.3", "status": "OK", "target": "src/render/layout.ts" },
+    { "id": "FR4.1", "status": "OK", "target": "src/render/layout.ts" },
+    { "id": "FR5.1", "status": "OK", "target": "src/main.ts" },
+    { "id": "NFR1", "status": "OK", "target": "src/main.ts" },
+    { "id": "NFR2", "status": "OK", "target": "tests/render/layout.test.ts" },
+    { "id": "NFR3", "status": "OK", "target": "tests/render/layout.test.ts" },
+    { "id": "NFR4", "status": "OK", "target": "tests/render/layout.test.ts" },
+    { "id": "NFR5", "status": "N/A", "target": "Manual iPhone Safari check, owned by Build and Test and the preview deployment" },
+    { "id": "NFR6", "status": "OK", "target": "src/render/layout.ts" }
+  ]
+}
