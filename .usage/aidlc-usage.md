@@ -1,12 +1,12 @@
 # AI-DLC Usage Report
 
-Generated from `aidlc-usage.csv` at 2026-11-16T00:05:08+09:00. Do not edit by hand; it is regenerated after each stage.
+Generated from `aidlc-usage.csv` at 2026-11-16T00:11:29+09:00. Do not edit by hand; it is regenerated after each stage.
 
-- Stage runs: 76
-- Total duration: 54h 47m 15s
-- Total credits: 1095.63 (34 N/A)
+- Stage runs: 77
+- Total duration: 54h 53m 18s
+- Total credits: 1112.99 (34 N/A)
 - Time zone: UTC+09:00
-- Hosts: unknown (7), Mac (69)
+- Hosts: unknown (7), Mac (70)
 
 ## Stage Log
 
@@ -88,6 +88,7 @@ Generated from `aidlc-usage.csv` at 2026-11-16T00:05:08+09:00. Do not edit by ha
 | 74 | construction | code-generation | 2026-11-15 23:57:57 | 2026-11-16 00:02:55 | 4m 58s | 26.9767 | Mac | approved: code-generation |
 | 75 | construction | build-and-test | 2026-11-16 00:03:15 | 2026-11-16 00:04:42 | 1m 27s | 9.2903 | Mac | approved: build-and-test |
 | 76 | operation | deployment-pipeline | 2026-11-16 00:05:01 | 2026-11-16 00:05:08 | 7s | N/A | Mac | skipped: deployment-pipeline |
+| 77 | operation | deployment-execution | 2026-11-16 00:05:26 | 2026-11-16 00:11:29 | 6m 3s | 17.3551 | Mac | approved: deployment-execution |
 
 ## Totals by Stage
 
@@ -114,7 +115,7 @@ Generated from `aidlc-usage.csv` at 2026-11-16T00:05:08+09:00. Do not edit by ha
 | construction | infrastructure-design | 3 | 6m 51s | N/A |
 | construction | ci-pipeline | 1 | 0s | N/A |
 | operation | deployment-pipeline | 4 | 31s | N/A |
-| operation | deployment-execution | 3 | 2h 4m 16s | 52.4466 |
+| operation | deployment-execution | 4 | 2h 10m 19s | 69.8017 |
 | operation | observability-setup | 1 | 14s | N/A |
 
 ## Notes
