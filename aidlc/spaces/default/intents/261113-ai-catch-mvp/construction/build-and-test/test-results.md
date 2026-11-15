@@ -80,6 +80,32 @@ The Renderer and SoundPlayer tests use hand-written fakes in Node; they are inte
 
 Still open after run 2: the live-site targets (U5-NFR3.2, 5.14, 5.15, 7.1, 7.2, 7.3, 8.24, 8.27) need the Cloudflare Pages preview URL from the developer (Q2 A). They are Unverified until then; no code change can close them, so no further loop-back is planned.
 
+## Live-Site Checks, 2026-11-15
+
+The developer made `snow-note/aiCatch` public and created the Cloudflare Pages project `ai-catch` (a first attempt created a Workers project, which failed at `npx wrangler deploy`; it was replaced by a Pages project). Empty commits `a729c8f` and `3132d50` on `feature/u5-publishing` triggered the preview build.
+
+| Check | Result |
+|---|---|
+| `curl -sI https://feature-u5-publishing.ai-catch.pages.dev/` | HTTP/2 200; `content-security-policy` exactly as NFR5.15; `x-content-type-options: nosniff`; `referrer-policy: no-referrer` |
+| `curl -sI https://ai-catch.pages.dev/` (production, still the PoC on `main`) | HTTP/2 200; no CSP yet, as expected until the merge |
+| Preview HTML asset references | only `./assets/index-bFTqt61n.js` and `./assets/index-CFEErAG5.css` |
+| Preview JS | HTTP 200, 26,259 bytes (identical to the local build), contains "Humans saved AI", no `http(s)://` URL |
+| Download time from this machine, no throttling | HTML 0.09 s, JS 0.08 s (not the NFR3.2 throttled browser check) |
+| GitHub API `repos/snow-note/aiCatch` | `visibility: public`, licence MIT, default branch `main`; `.kiro` present on `main` |
+
+Still pending from the developer: the Node version line of the Pages build log (NFR7.2, NFR8.24), the browser network panel and Fast 4G load time (NFR5.14, NFR3.2), the production URL in the README (NFR7.3), and the desktop and phone play checks (browser targets).
+
+## Developer Checks, 2026-11-15
+
+- Pages build log for `3132d50`: "Detected the following tools from environment: nodejs@24.22.1, npm@10.9.9" — `.node-version` is honoured.
+- Browser network panel, console, and Fast 4G load on the preview URL: no issue (developer report).
+- Desktop and phone play (smoothness, sound after START, VoiceOver, portrait and landscape): OK (developer report).
+- Public URL chosen for the README: `https://aicatch.snow-note.com` (custom domain on the Pages project; `curl -sI` HTTP/2 200).
+
+These are real-browser checks done by the developer by hand; no automated browser test exists in this project.
+
+Final result: every applicable target in `build-and-test-summary.md` is Met; TC-CI is N/A (owned by CI Pipeline).
+
 ## Loop-Back Log
 
 ### Loop-back 1 — 2026-11-13T14:51:36Z

@@ -6,7 +6,7 @@ Run 2, 2026-11-13 (after loop-back 1; run 1 results are in `test-results.md`). S
 
 - Build: **success** (typecheck, build, size).
 - Tests: **230 / 230 passed** (16 files).
-- Stage result: **not yet passing** — coverage (86.5%) and the U4 size target (26,259 bytes) are now Met after loop-back 1; the live-site targets still wait for the developer's publishing steps (Q2 A) and stay Unverified until the preview URL is checked.
+- Stage result: **passed** — every applicable target is Met (TC-CI is N/A: owned by the later CI Pipeline stage). Coverage and the U4 size target were met after loop-back 1; live-site targets were met on the Cloudflare Pages preview on 2026-11-15.
 
 ## Test Type Inventory
 
@@ -53,13 +53,13 @@ Target IDs are prefixed with the unit because U1 and U2 both define an `NFR2.1`.
 | U1-NFR8.11 | u1 tech-stack | Injected randomness | Present | `tests/game/spawner.test.ts` | build-and-test | Met |
 | U1-NFR5.2 | u1 tech-stack | No runtime services | None | grep (see U1-NFR5.1) | build-and-test | Met |
 | U1-NFR2.1 | u1 tech-stack | No runtime dependency or assets | None | `package.json` | build-and-test | Met |
-| U2-NFR1.1 | u2 performance | Draw + update fit a 60 fps frame | Not measured | Browser (play check on a phone) | build-and-test | Unverified (browser) |
+| U2-NFR1.1 | u2 performance | Draw + update fit a 60 fps frame | Smooth play reported on desktop and phone | Developer report 2026-11-15 (real browsers on desktop and phone, preview URL) | build-and-test | Met |
 | U2-NFR1.2 | u2 performance | No allocation-heavy per-frame work | `fillRect` runs from constant tables | Code review of `src/render/renderer.ts` | build-and-test | Met |
 | U2-NFR1.3 | u2 performance | Bounded effects (≤ 6 slices, ≤ 3 noise lines) | Bounded in code | Code review; `tests/render/screen-timing.test.ts` (`noiseLines`) | build-and-test | Met |
 | U2-NFR2.1 | u2 performance | U2 bundle growth < 10 kB gzip | +1.30 kB gzip (6.87 → 8.17) | U1 and U2 code summaries | build-and-test | Met |
-| U2-NFR3.1 | u2 performance | Title drawn on the first frame, no async load | No async load in code | Code review; first-frame look is browser | build-and-test | Unverified (browser) |
-| U2-NFR4.1 | u2 performance | Console fits 4:3, centred, no scroll | `fitCasing` tests pass | `tests/render/layout.test.ts`; on-screen fit is browser | build-and-test | Unverified (browser) |
-| U2-NFR9.1 | u2 performance | LCD text legible at 375×520 and 667×320 | Not measured | Browser (play check) | build-and-test | Unverified (browser) |
+| U2-NFR3.1 | u2 performance | Title drawn on the first frame, no async load | Title shown at once; no async load in code | Developer report 2026-11-15 (real browsers on desktop and phone, preview URL); code review | build-and-test | Met |
+| U2-NFR4.1 | u2 performance | Console fits 4:3, centred, no scroll | Portrait and landscape OK | Developer report 2026-11-15 (real browsers on desktop and phone, preview URL); `tests/render/layout.test.ts` | build-and-test | Met |
+| U2-NFR9.1 | u2 performance | LCD text legible at the smallest screens | Readable on the developer's phone | Developer report 2026-11-15 (real browsers on desktop and phone, preview URL) | build-and-test | Met |
 | U2-NFR5.3 | u2 security | No network or external resource | None | grep of `src/`, `style.css` | build-and-test | Met |
 | U2-NFR5.4 | u2 security | No HTML from strings | None | grep `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write` | build-and-test | Met |
 | U2-NFR5.5 | u2 security | Renderer reads `GameView` only | Typecheck passes | `npm run typecheck` | build-and-test | Met |
@@ -73,7 +73,7 @@ Target IDs are prefixed with the unit because U1 and U2 both define an `NFR2.1`.
 | U2-NFR2.2 | u2 tech-stack | No runtime dependency or assets | None | `package.json` | build-and-test | Met |
 | U3-NFR5.7 | u3 security | No audio file, URL, request | None | grep of `src/` | build-and-test | Met |
 | U3-NFR5.8 | u3 security | `unlock`/`play` never throw | No-context, throwing constructor, throwing `createOscillator`, rejected `resume` tests pass | `tests/audio/sound.test.ts` | build-and-test | Met |
-| U3-NFR5.9 | u3 security | Audio only after first START | `unlock()` only in START handlers | Code review of `src/main.ts`; phone check is browser | build-and-test | Unverified (browser) |
+| U3-NFR5.9 | u3 security | Audio only after first START | Silent before START on the phone, sound after | Developer report 2026-11-15 (real browsers on desktop and phone, preview URL); code review of `src/main.ts` | build-and-test | Met |
 | U3-NFR5.10 | u3 security | Peak gain 0.12 | 0.12 asserted | `tests/audio/sound.test.ts` (fake `AudioContext`) | build-and-test | Met |
 | U3-NFR6.4 | u3 security | Original cues, recorded | Recorded | `ASSETS.md` Sounds section | build-and-test | Met |
 | U3-NFR8.16 | u3 security | Pure tested `soundForEvent` | Tests pass | `tests/audio/sound.test.ts` | build-and-test | Met |
@@ -91,19 +91,19 @@ Target IDs are prefixed with the unit because U1 and U2 both define an `NFR2.1`.
 | U4-NFR8.22 | u4 tech-stack | `screenAnnouncement` returns `{ key, text }` | As coded | `src/game/announcer.ts` | build-and-test | Met |
 | U4-NFR8.23 | u4 tech-stack | Vitest with literal views | As coded | `tests/game/announcer.test.ts` | build-and-test | Met |
 | U5-NFR2.5 | u5 security | `npm run size` < 1 MB | 29,428 bytes, exit 0 | `npm run size` | build-and-test | Met |
-| U5-NFR3.2 | u5 security | Load event ≤ 2 s (Fast 4G, no cache) on preview | Not measured | Needs the Pages preview URL | build-and-test | Unverified |
-| U5-NFR5.14 | u5 security | Only same-origin requests on the deployed page | Static: no external URL in `src/` or `dist/` | Needs the preview URL network panel | build-and-test | Unverified |
-| U5-NFR5.15 | u5 security | Three headers on every path | `dist/_headers` correct locally | Needs `curl -sI` on the preview URL | build-and-test | Unverified |
+| U5-NFR3.2 | u5 security | Load event ≤ 2 s (Fast 4G, no cache) on preview | Within 2 s, no issue reported | Developer report 2026-11-15 (real browsers on desktop and phone, preview URL) (network panel); `curl` HTML 0.09 s, JS 0.08 s unthrottled | build-and-test | Met |
+| U5-NFR5.14 | u5 security | Only same-origin requests on the deployed page | No other-origin request, no CSP error | Developer report 2026-11-15 (real browsers on desktop and phone, preview URL) (network panel and console); served JS has no `http(s)://` URL | build-and-test | Met |
+| U5-NFR5.15 | u5 security | Three headers on every path | All three headers with the exact NFR5.15 values on the branch preview | `curl -sI https://feature-u5-publishing.ai-catch.pages.dev/` (HTTP/2 200), 2026-11-15 | build-and-test | Met |
 | U5-NFR5.16 | u5 security | No secret committed or untracked; no Pages variables | None found | `git ls-files` and `git ls-files -o --exclude-standard` | build-and-test | Met |
 | U5-NFR6.5 | u5 security | README originality section | Present | `README.md` | build-and-test | Met |
-| U5-NFR7.1 | u5 security | Public repo, MIT, `.kiro/` committed | MIT and `.kiro/` tracked; visibility not checked | Developer step 8 | build-and-test | Unverified |
-| U5-NFR7.2 | u5 security | Pages connected, settings, Node 24 | Not created yet | Developer step 8; build log | build-and-test | Unverified |
-| U5-NFR7.3 | u5 security | README complete incl. public URL | Complete except the URL placeholder | `README.md` | build-and-test | Unverified |
-| U5-NFR1.5 | u5 security | ~60 fps on desktop and phone | Not measured | Browser (play check) | build-and-test | Unverified (browser) |
-| U5-NFR8.24 | u5 tech-stack | `.node-version` 24 read by Pages | File present | Needs the Pages build log | build-and-test | Unverified |
+| U5-NFR7.1 | u5 security | Public repo, MIT, `.kiro/` committed | `visibility: public`, licence MIT, `.kiro` present on `main` | GitHub API `repos/snow-note/aiCatch` and `contents/.kiro?ref=main` (HTTP 200), unauthenticated | build-and-test | Met |
+| U5-NFR7.2 | u5 security | Pages connected, settings, Node 24 | Pages project `ai-catch`, production `main`, branch previews; build log "Detected the following tools from environment: nodejs@24.22.1" | Developer screenshot and build log, 2026-11-15 | build-and-test | Met |
+| U5-NFR7.3 | u5 security | README complete incl. public URL | All sections; Play Online links <https://aicatch.snow-note.com> (HTTP/2 200) | `README.md`; `curl -sI` | build-and-test | Met |
+| U5-NFR1.5 | u5 security | ~60 fps on desktop and phone | Smooth play reported | Developer report 2026-11-15 (real browsers on desktop and phone, preview URL) | build-and-test | Met |
+| U5-NFR8.24 | u5 tech-stack | `.node-version` 24 read by Pages | Node 24.22.1 installed by the build | Pages build log for `3132d50` | build-and-test | Met |
 | U5-NFR8.25 | u5 tech-stack | Dependency-free size script | Built-ins only; tests pass | `tests/tooling/check-size.test.ts` | build-and-test | Met |
-| U5-NFR8.26 | u5 tech-stack | `_headers` copied to `dist/` | Present | `dist/_headers` | build-and-test | Met |
-| U5-NFR8.27 | u5 tech-stack | Pages Git integration | Not created yet | Developer step 8 | build-and-test | Unverified |
+| U5-NFR8.26 | u5 tech-stack | `_headers` copied to `dist/` and applied by Pages | Present in `dist/`; applied on the preview | `dist/_headers`; `curl -sI` on the preview | build-and-test | Met |
+| U5-NFR8.27 | u5 tech-stack | Pages Git integration | Pages project `ai-catch` connected to `snow-note/aiCatch`; automatic deployments on; branch preview built on push | Developer screenshot of the Deployments tab; preview URL responds | build-and-test | Met |
 
 ## Readiness Assessment
 
@@ -111,12 +111,12 @@ Target IDs are prefixed with the unit because U1 and U2 both define an `NFR2.1`.
 |---|---|
 | Build-ready | Yes: clean typecheck, build, and size check |
 | Test-ready | Yes: 230/230 tests, 86.5% lines |
-| Deployment-ready | Build output ready; the live-site targets are not yet checked |
+| Deployment-ready | Yes: the branch preview passes; production (`main`, https://aicatch.snow-note.com) updates when `feature/u5-publishing` is merged |
 
 ## Known Limitations and Outstanding Items
 
 - Loop-back 1 (see `test-results.md`) repaired `u2-screens-and-art`, `u3-sound`, and `u4-accessibility`; each got fresh Plan Approval, review READY, and checkpoint approval.
 - The U4 size target holds with a 1-byte margin; any later bundle growth will miss it again.
 - `src/main.ts` (DOM wiring) has no unit tests; it is checked by playing.
-- Live-site targets (U5-NFR3.2, 5.14, 5.15, 7.1, 7.2, 7.3, 8.24, 8.27) wait for the developer's publishing steps (Q2 A).
-- Browser targets (U2-NFR1.1, 3.1, 4.1, 9.1, U3-NFR5.9, U5-NFR1.5) ran in Node only; no real browser engine ran here.
+- Production still serves the PoC from `main` until the merge; the CSP is only on the preview until then.
+- Browser targets were checked by the developer in real browsers and reported as passing; no automated browser test exists.

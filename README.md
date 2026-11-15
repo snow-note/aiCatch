@@ -72,7 +72,7 @@ Security headers are served from `public/_headers`, which Vite copies to `dist/_
 
 ## Play Online
 
-Production URL: _to be added after the first release._
+Play AI CATCH at <https://aicatch.snow-note.com>.
 
 ## Assets and Originality
 
