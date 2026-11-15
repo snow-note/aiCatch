@@ -1,5 +1,4 @@
 # Technology Stack
-
 | Area | Technology | Version | Evidence |
 |---|---|---|---|
 | Language | TypeScript (strict, ES2022 target, ESNext modules) | 7.0.2 | `package.json`, `tsconfig.json` |
@@ -11,10 +10,10 @@
 | CI | GitHub Actions (ubuntu-latest) | actions/checkout@v7, setup-node@v7 | `.github/workflows/ci.yml` |
 | Hosting | Cloudflare Pages (Git integration); security headers via `public/_headers` | n/a | `README.md`, `public/_headers` |
 | Usage tooling | Python 3 scripts (stdlib only) + unittest | n/a | `scripts/*.py`, `tests/scripts/` |
-
 ## Notes
 - Zero runtime dependencies; all `package.json` entries are devDependencies.
 - tsconfig: `strict`, `noUnusedLocals`, `noUnusedParameters`, `isolatedModules`, `noEmit`, `types: []`.
 - No linter or formatter is configured.
 - CSP: `default-src 'self'; connect-src 'none'` etc. (`public/_headers`), so no external requests are possible.
 - Size gate: `dist/` must stay under 1 MiB (`scripts/check-size.mjs`).
+- Not re-verified in this focused run (outside the snapshot paths); carried over from the prior store.

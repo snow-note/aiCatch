@@ -31,6 +31,7 @@ export function spawnObject(
   order: number,
   random: Random,
   aimX?: number,
+  collectibleSpeedFactor = 1,
 ): FallingObject {
   const kind = pickKind(collectibles, difficulty.virusShare, random);
   const aimed = kind === 'virus' && aimX !== undefined && random() < VIRUS_AIM_SHARE;
@@ -41,5 +42,7 @@ export function spawnObject(
       )
     : random() * (PLAY_W - OBJECT_W);
   const phase = random() * Math.PI * 2;
-  return createObject(kind, x, order, difficulty.fallSpeedMultiplier, phase);
+  // Only collectibles get the stage speed factor; VIRUS keeps its own speed (FR2.1, FR2.2).
+  const factor = kind === 'virus' ? 1 : collectibleSpeedFactor;
+  return createObject(kind, x, order, difficulty.fallSpeedMultiplier * factor, phase);
 }

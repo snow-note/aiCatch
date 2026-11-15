@@ -13,6 +13,9 @@ import {
   STAGE_CLEAR_DURATION,
   STAGE_INTRO_DURATION,
   START_LIVES,
+  STAGE_TIME_LIMIT,
+  TIME_BONUS_PER_SECOND,
+  TIME_WARNING_SECONDS,
   VICTORY_DURATION,
 } from './config';
 import { difficultyAt } from './difficulty';
@@ -23,6 +26,7 @@ import { spawnObject, type Random } from './spawner';
 import type {
   GameControls,
   GameEvent,
+  GameOverReason,
   GameView,
   Phase,
   StageDefinition,
@@ -51,6 +55,7 @@ export class GameState implements GameView, GameControls {
   score = 0;
   lives = START_LIVES;
   newHighScore = false;
+  gameOverReason: GameOverReason | null = null;
   readonly human = { x: (PLAY_W - HUMAN_W) / 2, y: PLAY_H - HUMAN_H, w: HUMAN_W, h: HUMAN_H };
   objects: FallingObject[] = [];
 
@@ -60,6 +65,8 @@ export class GameState implements GameView, GameControls {
   private readonly highScore: HighScoreLike | undefined;
   /** Seconds of play inside the current stage (drives difficulty). */
   private stageTime = 0;
+  /** Last whole second shown on the timer, so each warning beep is raised once (FR4.3). */
+  private lastTimerSecond = STAGE_TIME_LIMIT;
   private spawnTimer = 0;
   private nextOrder = 0;
   private events: GameEvent[] = [];
@@ -95,6 +102,13 @@ export class GameState implements GameView, GameControls {
 
   get aiRestoration(): number {
     return this.run.aiRestoration;
+  }
+
+  /** Seconds left in the stage. Only play time uses it up (FR3.2, FR3.6). */
+  get timeLeft(): number {
+    const left = STAGE_TIME_LIMIT - this.stageTime;
+    // Same tolerance as the time-out check, so the timer reads 0 exactly when time is up.
+    return left <= EPS ? 0 : left;
   }
 
   get canReturnToTitle(): boolean {
@@ -172,6 +186,7 @@ export class GameState implements GameView, GameControls {
     this.score = 0;
     this.lives = START_LIVES;
     this.newHighScore = false;
+    this.gameOverReason = null;
     this.objects = [];
     this.events.push({ type: 'run-start' });
     this.enterStageIntro();
@@ -182,6 +197,7 @@ export class GameState implements GameView, GameControls {
     this.phase = 'stage-intro';
     this.phaseTime = 0;
     this.stageTime = 0;
+    this.lastTimerSecond = STAGE_TIME_LIMIT;
     // The first spawn comes FIRST_SPAWN_DELAY into play, then every spawn interval (FR2.2).
     this.spawnTimer = this.stage.difficultyStart.spawnInterval - FIRST_SPAWN_DELAY;
     this.objects = [];
@@ -193,13 +209,16 @@ export class GameState implements GameView, GameControls {
   private clearStage(): void {
     const stage = this.stage;
     this.objects = [];
-    this.score += stage.clearBonus;
+    // Whole seconds left are worth points (FR6.1).
+    const timeBonus = Math.floor(this.timeLeft) * TIME_BONUS_PER_SECOND;
+    this.score += stage.clearBonus + timeBonus;
     this.phase = 'stage-clear';
     this.phaseTime = 0;
     this.events.push({
       type: 'stage-clear',
       stageIndex: this.run.stageIndex,
       bonus: stage.clearBonus,
+      timeBonus,
       aiRestoration: this.run.aiRestoration,
     });
   }
@@ -223,12 +242,13 @@ export class GameState implements GameView, GameControls {
   }
 
   /** W6 */
-  private enterGameOver(): void {
+  private enterGameOver(reason: GameOverReason): void {
     this.phase = 'game-over';
     this.phaseTime = 0;
     this.objects = [];
+    this.gameOverReason = reason;
     this.newHighScore = this.highScore ? this.highScore.submit(this.score) : false;
-    this.events.push({ type: 'game-over', score: this.score, newHighScore: this.newHighScore });
+    this.events.push({ type: 'game-over', score: this.score, newHighScore: this.newHighScore, reason });
   }
 
   /** W7 */
@@ -239,6 +259,7 @@ export class GameState implements GameView, GameControls {
     this.score = 0;
     this.lives = START_LIVES;
     this.newHighScore = false;
+    this.gameOverReason = null;
     this.objects = [];
     this.titleEnteredByPress = true;
   }
@@ -248,6 +269,7 @@ export class GameState implements GameView, GameControls {
   /** W3 */
   private updatePlaying(dt: number): void {
     this.stageTime += dt;
+    this.raiseTimeWarning();
 
     const dir = this.input.direction();
     this.human.x = Math.min(PLAY_W - HUMAN_W, Math.max(0, this.human.x + dir * HUMAN_SPEED * dt));
@@ -264,6 +286,7 @@ export class GameState implements GameView, GameControls {
             this.nextOrder++,
             this.random,
             this.human.x + HUMAN_W / 2,
+            stage.collectibleSpeedFactor,
           ),
         );
       }
@@ -279,6 +302,19 @@ export class GameState implements GameView, GameControls {
 
     // Objects that reach the bottom vanish with no penalty (BR2.6).
     this.objects = this.objects.filter((o) => !isBelowPlayArea(o));
+
+    // Checked last, so a clearing catch or a fatal VIRUS hit in this update wins (FR3.5).
+    if (this.stageTime >= STAGE_TIME_LIMIT - EPS) this.enterGameOver('time');
+  }
+
+  /** Raises one time-warning each time the displayed second drops into the last ones (FR4.3). */
+  private raiseTimeWarning(): void {
+    const second = Math.ceil(this.timeLeft);
+    if (second >= this.lastTimerSecond) return;
+    this.lastTimerSecond = second;
+    if (second >= 1 && second <= TIME_WARNING_SECONDS) {
+      this.events.push({ type: 'time-warning', secondsLeft: second });
+    }
   }
 
   /** Handles one touched object. Returns true when it ended the playing phase. */
@@ -297,7 +333,7 @@ export class GameState implements GameView, GameControls {
     this.events.push({ type: 'virus-hit', x: o.x, y: o.y });
     this.events.push({ type: 'life-lost', lives: this.lives });
     if (this.lives === 0) {
-      this.enterGameOver();
+      this.enterGameOver('lives');
       return true;
     }
     return false;

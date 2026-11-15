@@ -1,0 +1,32 @@
+{
+  "stage": "code-generation",
+  "upstream_ids": ["FR1.1","FR1.2","FR1.3","FR2.1","FR2.2","FR3.1","FR3.2","FR3.3","FR3.4","FR3.5","FR3.6","FR4.1","FR4.2","FR4.3","FR5.1","FR5.2","FR5.3","FR6.1","FR6.2","NFR1","NFR2","NFR3","NFR4","NFR5","NFR6","NFR7"],
+  "coverage": [
+    { "id": "FR1.1", "status": "OK", "target": "src/game/config.ts" },
+    { "id": "FR1.2", "status": "OK", "target": "tests/game/config.test.ts" },
+    { "id": "FR1.3", "status": "OK", "target": "tests/game/config.test.ts" },
+    { "id": "FR2.1", "status": "OK", "target": "src/game/spawner.ts" },
+    { "id": "FR2.2", "status": "OK", "target": "tests/game/spawner.test.ts" },
+    { "id": "FR3.1", "status": "OK", "target": "src/game/config.ts" },
+    { "id": "FR3.2", "status": "OK", "target": "src/game/state.ts" },
+    { "id": "FR3.3", "status": "OK", "target": "tests/game/state.test.ts" },
+    { "id": "FR3.4", "status": "OK", "target": "src/game/state.ts" },
+    { "id": "FR3.5", "status": "OK", "target": "tests/game/state.test.ts" },
+    { "id": "FR3.6", "status": "OK", "target": "src/game/types.ts" },
+    { "id": "FR4.1", "status": "OK", "target": "src/render/screen-timing.ts" },
+    { "id": "FR4.2", "status": "OK", "target": "src/render/renderer.ts" },
+    { "id": "FR4.3", "status": "OK", "target": "src/audio/sound.ts" },
+    { "id": "FR5.1", "status": "OK", "target": "src/game/types.ts" },
+    { "id": "FR5.2", "status": "OK", "target": "src/render/renderer.ts" },
+    { "id": "FR5.3", "status": "OK", "target": "src/game/announcer.ts" },
+    { "id": "FR6.1", "status": "OK", "target": "src/game/state.ts" },
+    { "id": "FR6.2", "status": "OK", "target": "src/game/config.ts" },
+    { "id": "NFR1", "status": "OK", "target": "src/game/config.ts" },
+    { "id": "NFR2", "status": "OK", "target": "tests/game/config.test.ts" },
+    { "id": "NFR3", "status": "OK", "target": "tests/game/config.test.ts" },
+    { "id": "NFR4", "status": "OK", "target": "tests/game/first-heart.test.ts" },
+    { "id": "NFR5", "status": "OK", "target": "tests/game/state.test.ts" },
+    { "id": "NFR6", "status": "OK", "target": "src/render/renderer.ts" },
+    { "id": "NFR7", "status": "OK", "target": "src/audio/sound.ts" }
+  ]
+}

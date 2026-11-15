@@ -7,6 +7,8 @@ import {
   messagesShown,
   noiseLines,
   reachedLine,
+  timerText,
+  timerVisible,
   victoryBarFill,
   victoryStep,
 } from './screen-timing';
@@ -72,6 +74,7 @@ const HUD_NAME_X = 2;
 const HUD_AI_X = 34;
 const HUD_SCORE_X = 66;
 const HUD_PROGRESS_X = 108;
+const HUD_TIMER_X = 132;
 const HUD_LIVES_X = 202;
 
 /** Victory noise changes position this many times per second. */
@@ -223,6 +226,9 @@ export class Renderer {
     this.drawText(ctx, hud.ai, HUD_AI_X, 4, 1, INK, false);
     this.drawNumber(ctx, state.score, HUD_SCORE_X, 3);
     this.drawText(ctx, hud.progress, HUD_PROGRESS_X, 4, 1, INK, false);
+    if (timerVisible(state.timeLeft, state.phaseTime)) {
+      this.drawText(ctx, timerText(state.timeLeft), HUD_TIMER_X, 4, 1, INK, false);
+    }
     this.drawLives(ctx, state, now);
     ctx.fillStyle = INK;
     ctx.fillRect(0, 14, PLAY_W, 1);
@@ -276,6 +282,7 @@ export class Renderer {
   private drawGameOver(ctx: CanvasRenderingContext2D, state: GameView, now: number): void {
     const t = state.phaseTime;
     this.drawText(ctx, 'GAME OVER', PLAY_W / 2, 20, 3, INK, true);
+    if (state.gameOverReason === 'time') this.drawText(ctx, 'TIME UP', PLAY_W / 2, 42, 1, INK, true);
     this.drawAiBar(ctx, state.aiRestoration, 56);
     this.drawText(ctx, reachedLine(state), PLAY_W / 2, 68, 1, INK, true);
     this.drawScoreLine(ctx, 'SCORE', state.score, 88);

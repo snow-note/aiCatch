@@ -10,6 +10,8 @@ import {
   STAGES,
   STAGE_CLEAR_DURATION,
   STAGE_INTRO_DURATION,
+  STAGE_TIME_LIMIT,
+  TIME_BONUS_PER_SECOND,
   VICTORY_DURATION,
 } from '../../src/game/config';
 import { createObject } from '../../src/game/objects';
@@ -199,8 +201,9 @@ describe('spawning (BR6.1)', () => {
     const g = playing();
     const max = STAGES[0]!.difficultyStart.maxObjects;
     let peak = 0;
-    for (let i = 0; i < 5; i++) {
-      g.update(1.2);
+    // Small steps: Stage 1 collectibles fall 1.2x faster, so coarse steps drop them before a third spawns.
+    for (let i = 0; i < 15; i++) {
+      g.update(0.4);
       peak = Math.max(peak, g.objects.length);
       expect(g.objects.length).toBeLessThanOrEqual(max);
     }
@@ -266,7 +269,8 @@ describe('stage clear (BR2.3-BR2.5, BR1.5, BR1.8)', () => {
     drop(g, 'mainframe');
     expect(g.phase).toBe('stage-clear');
     expect(g.objects).toHaveLength(0);
-    expect(g.score).toBe(POINTS.mainframe * stage.requiredCount + stage.clearBonus);
+    const timeBonus = Math.floor(g.timeLeft) * TIME_BONUS_PER_SECOND;
+    expect(g.score).toBe(POINTS.mainframe * stage.requiredCount + stage.clearBonus + timeBonus);
     expect(g.aiRestoration).toBe(25);
     expect(g.stageIndex).toBe(0);
     expect(g.stage.name).toBe('FORTRAN');
@@ -410,6 +414,108 @@ describe('game over (BR4.3, BR1.6, BR1.9, BR8.1)', () => {
     expect(g.phase).toBe('stage-intro');
     expect(g.score).toBe(0);
     expect(g.lives).toBe(START_LIVES);
+  });
+});
+
+/** Runs `seconds` of 1/60 s steps and returns every event raised on the way. */
+function runCollect(g: GameState, seconds: number): GameEvent[] {
+  const all: GameEvent[] = [];
+  const steps = Math.round(seconds * 60);
+  for (let i = 0; i < steps; i++) {
+    g.update(STEP);
+    all.push(...g.drainEvents());
+  }
+  return all;
+}
+
+describe('stage timer (FR3.x)', () => {
+  it('starts at the time limit and counts play time only (FR3.1, FR3.2, FR3.6)', () => {
+    const g = newGame();
+    g.pressStart();
+    expect(g.timeLeft).toBe(STAGE_TIME_LIMIT);
+    run(g, STAGE_INTRO_DURATION - 0.5);
+    expect(g.timeLeft).toBe(STAGE_TIME_LIMIT);
+    run(g, 0.5);
+    expect(g.phase).toBe('playing');
+    expect(g.timeLeft).toBe(STAGE_TIME_LIMIT);
+    run(g, 10);
+    expect(g.timeLeft).toBeCloseTo(STAGE_TIME_LIMIT - 10, 6);
+  });
+
+  it('stops during stage-clear and starts over in the next stage (FR3.2, FR3.3)', () => {
+    const g = playing();
+    run(g, 5);
+    for (let i = 0; i < g.stage.requiredCount; i++) drop(g, 'mainframe');
+    expect(g.phase).toBe('stage-clear');
+    const frozen = g.timeLeft;
+    expect(frozen).toBeCloseTo(STAGE_TIME_LIMIT - 5, 1);
+    run(g, 1);
+    expect(g.timeLeft).toBe(frozen);
+    run(g, STAGE_CLEAR_DURATION - 1);
+    expect(g.phase).toBe('stage-intro');
+    expect(g.timeLeft).toBe(STAGE_TIME_LIMIT);
+  });
+
+  it('ends the run with reason time and lives left when the time is up (FR3.4, FR5.1)', () => {
+    const g = playing();
+    run(g, STAGE_TIME_LIMIT - 1);
+    expect(g.phase).toBe('playing');
+    expect(g.gameOverReason).toBeNull();
+    const events = runCollect(g, 1.2);
+    expect(g.phase).toBe('game-over');
+    expect(g.lives).toBe(START_LIVES);
+    expect(g.timeLeft).toBe(0);
+    expect(g.gameOverReason).toBe('time');
+    expect(events.filter((e) => e.type === 'game-over')).toEqual([
+      { type: 'game-over', score: 0, newHighScore: false, reason: 'time' },
+    ]);
+  });
+
+  it('lets a clearing catch win a tie with the time-out (FR3.5)', () => {
+    const g = playing();
+    run(g, STAGE_TIME_LIMIT - 0.01);
+    for (let i = 0; i < g.stage.requiredCount - 1; i++) drop(g, 'mainframe');
+    expect(g.phase).toBe('playing');
+    g.drainEvents();
+    const last = createObject('mainframe', g.human.x, order++);
+    last.y = g.human.y - 4;
+    g.objects.push(last);
+    g.update(0.01);
+    expect(g.phase).toBe('stage-clear');
+    const types = g.drainEvents().map((e) => e.type);
+    expect(types).toContain('stage-clear');
+    expect(types).not.toContain('game-over');
+  });
+
+  it('reports reason lives when the last life is lost (FR5.1)', () => {
+    const g = playing();
+    expect(g.gameOverReason).toBeNull();
+    loseAllLives(g);
+    expect(g.gameOverReason).toBe('lives');
+    const over = g.drainEvents().find((e) => e.type === 'game-over');
+    expect(over).toMatchObject({ type: 'game-over', reason: 'lives' });
+  });
+
+  it('raises time-warning once each for 10 down to 1 (FR4.3)', () => {
+    const g = playing();
+    run(g, STAGE_TIME_LIMIT - 12);
+    g.drainEvents();
+    const warnings = runCollect(g, 13).filter((e) => e.type === 'time-warning');
+    expect(warnings).toEqual([10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((n) => ({ type: 'time-warning', secondsLeft: n })));
+  });
+
+  it('adds floor(timeLeft) x 10 at a clear and reports it in the event (FR6.1)', () => {
+    const g = playing();
+    run(g, 10);
+    for (let i = 0; i < g.stage.requiredCount - 1; i++) drop(g, 'mainframe');
+    g.drainEvents();
+    const before = g.score;
+    drop(g, 'mainframe');
+    const expectedBonus = Math.floor(g.timeLeft) * TIME_BONUS_PER_SECOND;
+    expect(expectedBonus).toBe(790);
+    expect(g.score).toBe(before + POINTS.mainframe + g.stage.clearBonus + expectedBonus);
+    const clear = g.drainEvents().find((e) => e.type === 'stage-clear');
+    expect(clear).toMatchObject({ type: 'stage-clear', timeBonus: expectedBonus });
   });
 });
 

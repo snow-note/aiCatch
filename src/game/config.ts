@@ -74,35 +74,46 @@ export const STAGES: ReadonlyArray<StageDefinition> = [
     difficultyStart: { fallSpeedMultiplier: 1.0, spawnInterval: 1.2, virusShare: 0.4, maxObjects: 3 },
     difficultyCap: { fallSpeedMultiplier: 1.2, spawnInterval: 1.0, virusShare: 0.45, maxObjects: 4 },
     clearBonus: 500,
+    collectibleSpeedFactor: 1.2,
   },
   {
     stageNumber: 2,
     name: 'COBOL',
     collectibles: ['tape'],
     requiredCount: 12,
-    difficultyStart: { fallSpeedMultiplier: 1.1, spawnInterval: 1.1, virusShare: 0.45, maxObjects: 4 },
-    difficultyCap: { fallSpeedMultiplier: 1.35, spawnInterval: 0.9, virusShare: 0.5, maxObjects: 5 },
+    difficultyStart: { fallSpeedMultiplier: 1.3, spawnInterval: 0.9, virusShare: 0.55, maxObjects: 5 },
+    difficultyCap: { fallSpeedMultiplier: 1.7, spawnInterval: 0.7, virusShare: 0.6, maxObjects: 6 },
     clearBonus: 500,
+    collectibleSpeedFactor: 1.3,
   },
   {
     stageNumber: 3,
     name: 'BASIC',
     collectibles: ['floppy'],
     requiredCount: 14,
-    difficultyStart: { fallSpeedMultiplier: 1.2, spawnInterval: 1.0, virusShare: 0.5, maxObjects: 4 },
-    difficultyCap: { fallSpeedMultiplier: 1.5, spawnInterval: 0.8, virusShare: 0.55, maxObjects: 5 },
+    difficultyStart: { fallSpeedMultiplier: 1.35, spawnInterval: 0.88, virusShare: 0.56, maxObjects: 5 },
+    difficultyCap: { fallSpeedMultiplier: 1.75, spawnInterval: 0.69, virusShare: 0.61, maxObjects: 6 },
     clearBonus: 500,
+    collectibleSpeedFactor: 1.4,
   },
   {
     stageNumber: 4,
     name: 'LLM',
     collectibles: ['llm', 'gpu', 'robot'],
     requiredCount: 16,
-    difficultyStart: { fallSpeedMultiplier: 1.3, spawnInterval: 0.9, virusShare: 0.55, maxObjects: 5 },
-    difficultyCap: { fallSpeedMultiplier: 1.7, spawnInterval: 0.7, virusShare: 0.6, maxObjects: 6 },
+    difficultyStart: { fallSpeedMultiplier: 1.4, spawnInterval: 0.85, virusShare: 0.58, maxObjects: 5 },
+    difficultyCap: { fallSpeedMultiplier: 1.8, spawnInterval: 0.68, virusShare: 0.62, maxObjects: 6 },
     clearBonus: 500,
+    collectibleSpeedFactor: 1.5,
   },
 ];
+
+/** Seconds of play allowed per stage (FR3.1). */
+export const STAGE_TIME_LIMIT = 90;
+/** The last seconds of a stage that blink and beep (FR4.2, FR4.3). */
+export const TIME_WARNING_SECONDS = 10;
+/** Points per whole second left when a stage is cleared (FR6.1, FR6.2). */
+export const TIME_BONUS_PER_SECOND = 10;
 
 /** Seconds of play before the first object of every stage appears (FR2.2). */
 export const FIRST_SPAWN_DELAY = 0.5;

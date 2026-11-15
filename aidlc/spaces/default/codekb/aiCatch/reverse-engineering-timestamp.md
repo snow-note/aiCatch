@@ -1,45 +1,37 @@
 # Reverse Engineering Timestamp
-
 ## Run Record
-
 - Date: 2026-11-15
-- Commit: d4ba5fdf4053b8651b8b19244dc08839d0db16d7
-- Kind: full rescan (all 9 artifacts replaced), Minimal depth, single repo `aiCatch`
+- Commit: c41d9198e9a7eafde81f47f19748936e97bc42df
+- Kind: focused partial rescan merged into a stale store (intent 261115-stage-time-limit), Minimal depth, single repo `aiCatch`
+- Analyzed this run: `src/game`, `src/render`, `tests/game`, `tests/render`. Sections updated: business-overview (scoring, run end), architecture (values, phase flow, HUD), code-structure (sizes, tests), api-documentation (contracts, announcer), component-inventory (game and render components), code-quality-assessment (intent findings). technology-stack and dependencies carried over (import lists re-verified for the snapshot paths).
 - Not executed: tests, builds, programs (code reading only)
-
 ## Scope of Analysis
-
 ```yaml
 scope_version: 1
-kind: full
-intent: 261115-early-heart-loss
-fingerprint: 3fc40700a7393142e4fff9b7176f72376c92d46c
+kind: partial
+intent: 261115-stage-time-limit
+fingerprint: e9d7e9bfd5d14c5e89abb2c549921c5352a94821
 analyzed:
   paths:
-    - ./
+    - src/game
+    - src/render
+    - tests/game
+    - tests/render
   components:
     - Config
     - Types
     - GameState
     - Objects
-    - Collision
     - Spawner
     - Difficulty
     - Run
-    - Input Tracker
     - Announcer
-    - High Score Store
-    - Bootstrap
     - Renderer
-    - Sprites
     - Screen Timing
     - Layout
-    - Sound
-    - Usage Tracking Scripts
-    - Build Size Gate
-    - CI Pipeline
 shallow:
   paths:
+    - ./
     - src/render/sprites.ts
     - src/style.css
     - scripts/aidlc_usage.py
