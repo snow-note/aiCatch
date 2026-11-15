@@ -18,7 +18,8 @@
     },
     "cloudflare-api": {
       "type": "remote",
-      "url": "https://mcp.cloudflare.com/mcp"
+      "url": "https://mcp.cloudflare.com/mcp",
+      "disabledTools": []
     },
     "cloudflare-docs": {
       "type": "remote",
