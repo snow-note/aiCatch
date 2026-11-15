@@ -1,12 +1,12 @@
 # AI-DLC Usage Report
 
-Generated from `aidlc-usage.csv` at 2026-11-13T22:35:11+09:00. Do not edit by hand; it is regenerated after each stage.
+Generated from `aidlc-usage.csv` at 2026-11-15T10:36:43+09:00. Do not edit by hand; it is regenerated after each stage.
 
-- Stage runs: 45
-- Total duration: 12h 39m 42s
-- Total credits: 560.788 (25 N/A)
+- Stage runs: 48
+- Total duration: 48h 41m 12s
+- Total credits: 737.621 (26 N/A)
 - Time zone: UTC+09:00
-- Hosts: unknown (7), Mac (38)
+- Hosts: unknown (7), Mac (41)
 
 ## Stage Log
 
@@ -57,6 +57,9 @@ Generated from `aidlc-usage.csv` at 2026-11-13T22:35:11+09:00. Do not edit by ha
 | 43 | construction | code-generation | 2026-11-13 22:25:29 | 2026-11-13 22:29:58 | 4m 29s | 69.0738 | Mac | auto-ended by stage transition |
 | 44 | construction | code-generation | 2026-11-13 22:29:59 | 2026-11-13 22:34:42 | 4m 44s | N/A | Mac | auto-ended by stage transition |
 | 45 | construction | code-generation | 2026-11-13 22:34:42 | 2026-11-13 22:35:11 | 29s | N/A | Mac | auto-ended by stage transition |
+| 46 | construction | functional-design | 2026-11-13 22:35:11 | 2026-11-15 10:35:06 | 35h 59m 55s | 168.9921 | Mac | auto-ended by stage transition |
+| 47 | construction | build-and-test | 2026-11-15 10:35:08 | 2026-11-15 10:36:43 | 1m 35s | 7.8408 | Mac | auto-ended by stage transition |
+| 48 | construction | ci-pipeline | 2026-11-15 10:36:43 | 2026-11-15 10:36:43 | 0s | N/A | Mac | approved: build-and-test |
 
 ## Totals by Stage
 
@@ -65,7 +68,7 @@ Generated from `aidlc-usage.csv` at 2026-11-13T22:35:11+09:00. Do not edit by ha
 | inception | requirements-analysis | 2 | 3h 13m 5s | 17.811 (1 N/A) |
 | inception | user-stories | 2 | 3h 14m 4s | 20.1764 (1 N/A) |
 | construction | code-generation | 14 | 1h 46m 33s | 166.487 (11 N/A) |
-| construction | build-and-test | 1 | 9m 24s | N/A |
+| construction | build-and-test | 2 | 10m 59s | 7.8408 (1 N/A) |
 | ideation | intent-capture | 1 | 22m 6s | 30.2173 |
 | ideation | feasibility | 1 | 5m 59s | 12.0521 |
 | ideation | scope-definition | 1 | 7m 27s | 8.7738 |
@@ -77,10 +80,11 @@ Generated from `aidlc-usage.csv` at 2026-11-13T22:35:11+09:00. Do not edit by ha
 | inception | units-generation | 1 | 12m 47s | 29.0537 |
 | inception | contract-design | 1 | 17m 45s | 30.36 |
 | inception | delivery-planning | 1 | 10m 39s | 25.333 |
-| construction | functional-design | 6 | 44m 17s | 121.572 (2 N/A) |
+| construction | functional-design | 7 | 36h 44m 12s | 290.564 (2 N/A) |
 | construction | nfr-requirements | 3 | 8m 36s | N/A |
 | construction | nfr-design | 3 | 8m 9s | N/A |
 | construction | infrastructure-design | 3 | 6m 51s | N/A |
+| construction | ci-pipeline | 1 | 0s | N/A |
 
 ## Notes
 

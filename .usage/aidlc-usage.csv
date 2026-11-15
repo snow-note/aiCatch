@@ -44,3 +44,6 @@ construction,infrastructure-design,2026-11-13T22:22:49+09:00,2026-11-13T22:25:29
 construction,code-generation,2026-11-13T22:25:29+09:00,2026-11-13T22:29:58+09:00,269,69.0738,auto-ended by stage transition,Mac
 construction,code-generation,2026-11-13T22:29:59+09:00,2026-11-13T22:34:42+09:00,284,N/A,auto-ended by stage transition,Mac
 construction,code-generation,2026-11-13T22:34:42+09:00,2026-11-13T22:35:11+09:00,29,N/A,auto-ended by stage transition,Mac
+construction,functional-design,2026-11-13T22:35:11+09:00,2026-11-15T10:35:06+09:00,129595,168.9921,auto-ended by stage transition,Mac
+construction,build-and-test,2026-11-15T10:35:08+09:00,2026-11-15T10:36:43+09:00,95,7.8408,auto-ended by stage transition,Mac
+construction,ci-pipeline,2026-11-15T10:36:43+09:00,2026-11-15T10:36:43+09:00,0,N/A,approved: build-and-test,Mac
