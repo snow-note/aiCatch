@@ -325,7 +325,7 @@ describe('victory (BR2.7, BR8.1)', () => {
     expect(events).toEqual<GameEvent[]>([{ type: 'victory', score: g.score, newHighScore: true }]);
   });
 
-  it('returns to the title only after 3.5 s on a new press', () => {
+  it('returns to the title only after the ending message on a new press', () => {
     const g = playing(fakeStore());
     for (let s = 0; s < 3; s++) {
       clearStageAndAdvance(g);
@@ -336,9 +336,16 @@ describe('victory (BR2.7, BR8.1)', () => {
     expect(g.phase).toBe('victory');
     g.pressStart();
     expect(g.phase).toBe('victory');
-    run(g, VICTORY_DURATION - 0.1);
+    run(g, 3.5);
     expect(g.canReturnToTitle).toBe(false);
-    run(g, 0.2);
+    g.pressStart();
+    expect(g.phase).toBe('victory');
+    run(g, 22 - 3.5);
+    expect(g.canReturnToTitle).toBe(false);
+    g.inputDown('key:Enter', null);
+    g.pressStart();
+    expect(g.phase).toBe('victory');
+    run(g, VICTORY_DURATION - 22 + 0.1);
     expect(g.canReturnToTitle).toBe(true);
     g.inputDown('key:Enter', null);
     g.pressStart();

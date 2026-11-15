@@ -36,7 +36,15 @@
     "slug": "responsive-orientation",
     "dirName": "261115-responsive-orientation",
     "scope": "bugfix",
-    "status": "in-flight",
+    "status": "complete",
     "request": "9806e5b8"
+  },
+  {
+    "uuid": "01a1dfa9-2295-700d-a654-9216bda30350",
+    "slug": "ending-message",
+    "dirName": "261115-ending-message",
+    "scope": "express",
+    "status": "in-flight",
+    "request": "390421e6"
   }
 ]

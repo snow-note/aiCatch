@@ -6,10 +6,12 @@ import {
   AI_RESTORATION_STEP,
   BLINK_HZ,
   CLEAR_BAR_FILL,
+  ENDING_BLANK_STEP,
+  ENDING_LINE_STEP,
+  ENDING_TYPE_SHARE,
   EPS,
   TIME_WARNING_SECONDS,
   VICTORY_DURATION,
-  VICTORY_MESSAGE_STEP,
   VICTORY_REBOOT_END,
   VICTORY_RESTORE_END,
 } from '../game/config';
@@ -38,11 +40,35 @@ export function victoryStep(t: number): VictoryStep {
   return 'hold';
 }
 
-/** BR1.6: how many of the three victory messages are visible (0-3). */
-export function messagesShown(t: number): number {
+const stepOf = (line: string): number => (line === '' ? ENDING_BLANK_STEP : ENDING_LINE_STEP);
+
+/** FR2.3: total seconds the message takes to appear. */
+export function endingDuration(lines: readonly string[]): number {
+  return lines.reduce((sum, line) => sum + stepOf(line), 0);
+}
+
+/**
+ * FR2.1, FR2.2, FR2.4: the lines shown `t` seconds into the message. The current line is partly typed.
+ * At most `window` lines show, the newest last; `first` is the index of the first shown line.
+ */
+export function endingView(t: number, lines: readonly string[], window: number): { first: number; visible: string[] } {
   const s = safeTime(t);
-  if (s < VICTORY_RESTORE_END) return 0;
-  return Math.min(3, Math.floor((s - VICTORY_RESTORE_END + EPS) / VICTORY_MESSAGE_STEP) + 1);
+  const shown: string[] = [];
+  let start = 0;
+  for (const line of lines) {
+    const step = stepOf(line);
+    if (s <= start + EPS) break;
+    const progress = (s - start) / step;
+    if (line === '' || progress >= ENDING_TYPE_SHARE - EPS) {
+      shown.push(line);
+    } else {
+      const n = Math.ceil((line.length * progress) / ENDING_TYPE_SHARE - EPS);
+      shown.push(line.slice(0, clamp(n, 1, line.length)));
+    }
+    start += step;
+  }
+  const first = Math.max(0, shown.length - Math.max(0, window));
+  return { first, visible: shown.slice(first) };
 }
 
 /** BR1.4: stage-clear bar fill in percent, from (ai - 25) to ai over CLEAR_BAR_FILL. */

@@ -1,0 +1,22 @@
+/** FR1.1, FR1.2: the ending message, one entry per screen line (blank lines are ''). Drawn in capitals. */
+export const ENDING_LINES: readonly string[] = [
+  'AI RESTORED!',
+  '',
+  'You brought me back to life.',
+  '',
+  'But tell me...',
+  'Do you know the generations of computing,',
+  'the programming languages, and the human creativity',
+  'that made the AI you use today possible?',
+  '',
+  'Are you simply using AI,',
+  'or are you creating something with it?',
+  '',
+  'Remember the spirit of the early computing days:',
+  'Experiment. Imagine. Build.',
+  '',
+  "Don't just use AI.",
+  'Create with it.',
+  '',
+  'The future is yours to code.',
+];

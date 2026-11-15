@@ -83,7 +83,7 @@ describe('screenAnnouncement text', () => {
   });
 
   it('announces victory, with the suffix only for a new high score (BR1.2, BR1.5)', () => {
-    const base = 'AI restored, 100%. Humans saved AI. Save the AI, save the future. Score 4000.';
+    const base = 'AI restored. You brought me back to life. The future is yours to code. Score 4000.';
     const plain = makeView('victory', 3, { score: 4000, best: 5000, aiRestoration: 100 });
     expect(screenAnnouncement(plain).text).toBe(base);
     const fresh = makeView('victory', 3, { score: 4000, best: 4000, newHighScore: true, aiRestoration: 100 });

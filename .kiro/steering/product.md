@@ -164,13 +164,27 @@ When Stage 4 is completed:
 - AI restoration reaches 100%.
 - The AI system returns to its restored state.
 - A final victory animation and visual feedback are displayed.
-- The game presents the following messages:
+- The game presents the following message, typed out line by line (about 20 seconds), and returns to the title only after it has appeared:
 
-**AI RESTORED — 100%**
-
-**HUMANS SAVED AI.**
-
-**SAVE THE AI. SAVE THE FUTURE.**
+> AI RESTORED!
+>
+> You brought me back to life.
+>
+> But tell me...
+> Do you know the generations of computing,
+> the programming languages, and the human creativity
+> that made the AI you use today possible?
+>
+> Are you simply using AI,
+> or are you creating something with it?
+>
+> Remember the spirit of the early computing days:
+> Experiment. Imagine. Build.
+>
+> Don't just use AI.
+> Create with it.
+>
+> The future is yours to code.
 
 The ending should reinforce the relationship between humanity, computing history, and the future of AI.
 

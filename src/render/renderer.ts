@@ -1,10 +1,11 @@
-import { CLEAR_BAR_FILL, OBJECT_H, OBJECT_W, PLAY_H, PLAY_W, START_LIVES } from '../game/config';
+import { CLEAR_BAR_FILL, OBJECT_H, OBJECT_W, PLAY_H, PLAY_W, START_LIVES, VICTORY_RESTORE_END } from '../game/config';
+import { ENDING_LINES } from './ending';
 import type { GameEvent, GameView, ObjectKind } from '../game/types';
 import {
   barFill,
   blinkOn,
   hudTexts,
-  messagesShown,
+  endingView,
   noiseLines,
   reachedLine,
   timerText,
@@ -56,6 +57,11 @@ const GHOST = 'rgba(31, 42, 28, 0.10)';
 const DIGIT_W = 5;
 const DIGIT_H = 9;
 const SCORE_DIGITS = 6;
+
+/** Ending message text area: 12 lines at an 8 px pitch from y 6 (FR2.2). */
+const ENDING_WINDOW = 12;
+const ENDING_TOP = 6;
+const ENDING_PITCH = 8;
 
 /** AI bar geometry (shared part): 160 x 6 outline at x 40. */
 const BAR_X = 40;
@@ -297,18 +303,18 @@ export class Renderer {
     const t = state.phaseTime;
     const step = victoryStep(t);
 
-    this.drawBitmap(ctx, step === 'reboot' ? AI_FACE_BROKEN : AI_FACE_RESTORED, (PLAY_W - 24) / 2, 8, INK);
-    this.drawAiBar(ctx, step === 'reboot' ? victoryBarFill(t) : 100, 58);
-
-    if (step === 'reboot') {
-      this.drawNoise(ctx, t);
-      return;
+    if (step === 'reboot' || step === 'restore') {
+      this.drawBitmap(ctx, step === 'reboot' ? AI_FACE_BROKEN : AI_FACE_RESTORED, (PLAY_W - 24) / 2, 8, INK);
+      this.drawAiBar(ctx, step === 'reboot' ? victoryBarFill(t) : 100, 58);
+      if (step === 'reboot') this.drawNoise(ctx, t);
+    } else {
+      // FR1.3, FR2.1, FR2.2: the message types in line by line and scrolls once the text area is full.
+      const view = endingView(t - VICTORY_RESTORE_END, ENDING_LINES, ENDING_WINDOW);
+      view.visible.forEach((line, i) => {
+        if (line !== '') this.drawText(ctx, line, PLAY_W / 2, ENDING_TOP + i * ENDING_PITCH, 1, INK, true);
+      });
     }
-
-    const shown = messagesShown(t);
-    if (shown >= 1) this.drawText(ctx, 'AI RESTORED — 100%', PLAY_W / 2, 40, 2, INK, true);
-    if (shown >= 2) this.drawText(ctx, 'HUMANS SAVED AI.', PLAY_W / 2, 76, 1, INK, true);
-    if (shown >= 3) this.drawText(ctx, 'SAVE THE AI. SAVE THE FUTURE.', PLAY_W / 2, 90, 1, INK, true);
+    if (step === 'reboot') return;
 
     if (step === 'hold') {
       this.drawScoreLine(ctx, 'SCORE', state.score, 108);

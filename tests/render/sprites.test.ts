@@ -71,7 +71,7 @@ describe('sprites', () => {
     for (const row of AI_FACE_RESTORED) expect(row).toBe([...row].reverse().join(''));
   });
 
-  it.each(['%', '.', ':', '/', '—'])('the font has a 3x5 glyph for %s', (ch) => {
+  it.each(['%', '.', ':', '/', '—', ',', '?', "'"])('the font has a 3x5 glyph for %s', (ch) => {
     const glyph = FONT[ch];
     expect(glyph).toBeDefined();
     expect(glyph).toHaveLength(FONT_H);

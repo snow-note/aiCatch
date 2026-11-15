@@ -39,13 +39,18 @@ export const START_LIVES = 3;
 /** Phase durations in seconds (contract C1). */
 export const STAGE_INTRO_DURATION = 2.0;
 export const STAGE_CLEAR_DURATION = 2.5;
-export const VICTORY_DURATION = 3.5;
+/** FR3.3: the end of the ending message (VICTORY_RESTORE_END + message length). */
+export const VICTORY_DURATION = 22.3;
 export const GAME_OVER_DURATION = 2.0;
 
 /** Display sub-steps inside the phase durations (U2 drawing only). The hold step starts at VICTORY_DURATION. */
 export const VICTORY_REBOOT_END = 1.5;
 export const VICTORY_RESTORE_END = 2.5;
-export const VICTORY_MESSAGE_STEP = 0.33;
+/** FR2.3, NFR4: ending message timing, in seconds per text line / per blank line. */
+export const ENDING_LINE_STEP = 1.2;
+export const ENDING_BLANK_STEP = 0.7;
+/** Share of a text line's step spent typing its characters. */
+export const ENDING_TYPE_SHARE = 0.6;
 /** Seconds the stage-clear AI bar takes to fill. */
 export const CLEAR_BAR_FILL = 1.0;
 /** Blinks per second of "PRESS START" style prompts. */
