@@ -74,6 +74,10 @@ Security headers are served from `public/_headers`, which Vite copies to `dist/_
 
 Play AI CATCH at <https://aicatch.snow-note.com>.
 
+## Documentation
+- [Architecture and screen flow](docs/architecture.md)
+- [Tech stack](docs/tech-stack.md)
+
 ## Assets and Originality
 
 All art, sound, and UI are original. No third-party assets are used. See `ASSETS.md`.
