@@ -1,0 +1,20 @@
+{
+  "stage": "infrastructure-design",
+  "unit": "u2-screens-and-art",
+  "upstream_ids": ["NFR1.1","NFR1.2","NFR1.3","NFR2.1","NFR3.1","NFR4.1","NFR9.1","NFR5.3","NFR5.4","NFR5.5","NFR5.6","NFR6.2","NFR6.3"],
+  "coverage": [
+    { "id": "NFR1.1", "status": "OK", "target": "preview play check gate (cicd-pipeline stage 5)" },
+    { "id": "NFR1.2", "status": "N/A", "target": "code-level drawing design; no infrastructure needed" },
+    { "id": "NFR1.3", "status": "N/A", "target": "code-level effect bounds; no infrastructure needed" },
+    { "id": "NFR2.1", "status": "OK", "target": "build size check in monitoring-design and review gate" },
+    { "id": "NFR3.1", "status": "OK", "target": "Cloudflare Pages same-origin static hosting (infrastructure-specification)" },
+    { "id": "NFR4.1", "status": "OK", "target": "preview play check in portrait and landscape" },
+    { "id": "NFR9.1", "status": "OK", "target": "preview play check on the phone" },
+    { "id": "NFR5.3", "status": "OK", "target": "same-origin networking (infrastructure-specification) and review gate" },
+    { "id": "NFR5.4", "status": "OK", "target": "review gate grep for HTML string writes" },
+    { "id": "NFR5.5", "status": "OK", "target": "npm run typecheck gate" },
+    { "id": "NFR5.6", "status": "OK", "target": "npm test gate for pure helpers" },
+    { "id": "NFR6.2", "status": "OK", "target": "ASSETS.md review gate" },
+    { "id": "NFR6.3", "status": "N/A", "target": "code-level font choice; no infrastructure needed" }
+  ]
+}

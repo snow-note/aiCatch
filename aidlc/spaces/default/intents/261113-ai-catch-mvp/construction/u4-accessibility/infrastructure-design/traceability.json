@@ -1,0 +1,50 @@
+{
+  "stage": "infrastructure-design",
+  "unit": "u4-accessibility",
+  "upstream_ids": [
+    "NFR5.11",
+    "NFR5.12",
+    "NFR5.13",
+    "NFR1.4",
+    "NFR8.20",
+    "NFR2.4",
+    "NFR8.21"
+  ],
+  "coverage": [
+    {
+      "id": "NFR5.11",
+      "status": "OK",
+      "target": "review gate: no innerHTML in src, textContent write (cicd-pipeline stage 4)"
+    },
+    {
+      "id": "NFR5.12",
+      "status": "OK",
+      "target": "review gate: getElementById lookup and one try/catch (stage 4)"
+    },
+    {
+      "id": "NFR5.13",
+      "status": "OK",
+      "target": "review gate: builder imports only the GameView type (stage 4)"
+    },
+    {
+      "id": "NFR1.4",
+      "status": "OK",
+      "target": "npm test gate (key tests), review of the write-on-change guard (stage 4), and preview play check"
+    },
+    {
+      "id": "NFR8.20",
+      "status": "OK",
+      "target": "tests-first stage 2 and npm test gate"
+    },
+    {
+      "id": "NFR2.4",
+      "status": "OK",
+      "target": "build gate with the +1 kB size note (stage 3)"
+    },
+    {
+      "id": "NFR8.21",
+      "status": "OK",
+      "target": "review of the index.html live region (stage 4) and VoiceOver preview play check (stage 5)"
+    }
+  ]
+}

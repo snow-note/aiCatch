@@ -1,0 +1,16 @@
+{
+  "stage": "nfr-design",
+  "unit": "u4-accessibility",
+  "upstream_ids": ["NFR5.11","NFR5.12","NFR5.13","NFR1.4","NFR2.4","NFR8.20","NFR8.21","NFR8.22","NFR8.23"],
+  "coverage": [
+    { "id": "NFR5.11", "status": "OK", "target": "SD4-1 textContent only, text from numbers, fixed names, and constants" },
+    { "id": "NFR5.12", "status": "OK", "target": "SD4-2 null-safe lookup; SD4-4 one guard around build and write" },
+    { "id": "NFR5.13", "status": "OK", "target": "SD4-3 no network, storage, timer, or DOM in the builder" },
+    { "id": "NFR1.4", "status": "OK", "target": "SD4-4 write only on key change" },
+    { "id": "NFR2.4", "status": "OK", "target": "SD4-6 no asset or dependency" },
+    { "id": "NFR8.20", "status": "OK", "target": "SD4-5 pure GameView-typed builder, tests first" },
+    { "id": "NFR8.21", "status": "OK", "target": "logical-components.md live region row (existing U2 markup)" },
+    { "id": "NFR8.22", "status": "OK", "target": "logical-components.md screenAnnouncement row; SD4-5" },
+    { "id": "NFR8.23", "status": "OK", "target": "SD4-5 Vitest tests with literal GameView objects" }
+  ]
+}

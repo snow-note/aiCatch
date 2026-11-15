@@ -9,8 +9,7 @@ import {
   VIRUS_JITTER_AMPLITUDE,
 } from './config';
 
-export type ObjectKind = 'llm' | 'gpu' | 'robot' | 'virus';
-export type RescueKind = Exclude<ObjectKind, 'virus'>;
+import type { CollectibleKind, ObjectKind } from './types';
 
 export interface FallingObject {
   kind: ObjectKind;
@@ -30,7 +29,7 @@ export interface FallingObject {
   phase: number;
 }
 
-export function isRescue(kind: ObjectKind): kind is RescueKind {
+export function isCollectible(kind: ObjectKind): kind is CollectibleKind {
   return kind !== 'virus';
 }
 

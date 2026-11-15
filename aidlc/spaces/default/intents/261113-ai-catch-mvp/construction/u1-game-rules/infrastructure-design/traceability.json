@@ -1,0 +1,17 @@
+{
+  "stage": "infrastructure-design",
+  "unit": "u1-game-rules",
+  "upstream_ids": ["NFR5.1","NFR8.1","NFR8.2","NFR8.3","NFR8.4","NFR8.5","NFR8.6","NFR6.1","NFR8.9","NFR8.10"],
+  "coverage": [
+    { "id": "NFR5.1", "status": "OK", "target": "pull request import review gate (cicd-pipeline stage 4)" },
+    { "id": "NFR8.1", "status": "OK", "target": "npm test under node environment plus import review gate" },
+    { "id": "NFR8.2", "status": "N/A", "target": "code-level parse rule; no infrastructure needed, enforced by the unit test gate" },
+    { "id": "NFR8.3", "status": "N/A", "target": "code-level storage fallback; no infrastructure needed, enforced by the unit test gate" },
+    { "id": "NFR8.4", "status": "N/A", "target": "code-level guard clauses; no infrastructure needed, enforced by the unit test gate" },
+    { "id": "NFR8.5", "status": "N/A", "target": "code-level clamps; no infrastructure needed, enforced by the unit test gate" },
+    { "id": "NFR8.6", "status": "N/A", "target": "code-level loop bound; no infrastructure needed, enforced by the unit test gate" },
+    { "id": "NFR6.1", "status": "OK", "target": "dependency review gate on package.json (cicd-pipeline stage 4)" },
+    { "id": "NFR8.9", "status": "OK", "target": "npm run typecheck gate" },
+    { "id": "NFR8.10", "status": "N/A", "target": "code placement rule in config.ts; no infrastructure needed" }
+  ]
+}

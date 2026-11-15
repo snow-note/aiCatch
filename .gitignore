@@ -58,12 +58,15 @@ test-results/
 scratch/
 # ========================================
 # AI-DLC machine-local runtime (per-user cursors, sessions, engine state)
+# These patterns live in .git/info/exclude (per clone) instead of here, so the
+# Kiro IDE does not block agents from reading/writing them. Add them to
+# .git/info/exclude in every new clone:
+#   aidlc/.aidlc-clone-id
+#   aidlc/.aidlc-sessions/
+#   aidlc/active-space
+#   aidlc/spaces/*/intents/active-intent
+#   aidlc/spaces/*/intents/.aidlc-*
+#   **/aidlc/spaces/*/intents/**/.aidlc-engine/
+#   aidlc/spaces/*/intents/*/runtime-graph.json
+#   aidlc/spaces/*/intents/*/.aidlc-*
 # ========================================
-aidlc/.aidlc-clone-id
-aidlc/.aidlc-sessions/
-aidlc/active-space
-aidlc/spaces/*/intents/active-intent
-aidlc/spaces/*/intents/.aidlc-*
-**/aidlc/spaces/*/intents/**/.aidlc-engine/
-aidlc/spaces/*/intents/*/runtime-graph.json
-aidlc/spaces/*/intents/*/.aidlc-*

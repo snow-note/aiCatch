@@ -1,0 +1,15 @@
+{
+  "stage": "nfr-design",
+  "unit": "u1-game-rules",
+  "upstream_ids": ["NFR5.1","NFR8.1","NFR8.2","NFR8.3","NFR8.4","NFR8.5","NFR8.6","NFR6.1"],
+  "coverage": [
+    { "id": "NFR5.1", "status": "OK", "target": "SD-1 sibling-only imports, no network APIs in src/game" },
+    { "id": "NFR8.1", "status": "OK", "target": "SD-2 injected StorageLike and Random; node test environment" },
+    { "id": "NFR8.2", "status": "OK", "target": "SD-3 parseStoredScore whole-number check" },
+    { "id": "NFR8.3", "status": "OK", "target": "SD-4 try/catch inside HighScoreStore with session fallback" },
+    { "id": "NFR8.4", "status": "OK", "target": "SD-5 guard clauses on every GameControls method" },
+    { "id": "NFR8.5", "status": "OK", "target": "SD-6 clamps where values change" },
+    { "id": "NFR8.6", "status": "OK", "target": "SD-7 spawn loop capped at 100 per update plus max-objects skip" },
+    { "id": "NFR6.1", "status": "OK", "target": "SD-8 no assets or packages added" }
+  ]
+}

@@ -1,63 +1,54 @@
 import { describe, expect, it } from 'vitest';
-import { spawnInterval, speedMultiplier, virusShare } from '../../src/game/difficulty';
+import { DIFFICULTY_STEP_SECONDS, DIFFICULTY_STEPS_TO_CAP, STAGES } from '../../src/game/config';
+import { difficultyAt } from '../../src/game/difficulty';
 
-describe('spawnInterval', () => {
-  it('starts at 1.2 s', () => {
-    expect(spawnInterval(0)).toBeCloseTo(1.2, 10);
-    expect(spawnInterval(14.9)).toBeCloseTo(1.2, 10);
+const stage1 = STAGES[0]!;
+const capTime = DIFFICULTY_STEP_SECONDS * DIFFICULTY_STEPS_TO_CAP;
+
+describe('difficultyAt (BR5.1)', () => {
+  it('returns the stage start values at 0 s', () => {
+    expect(difficultyAt(stage1, 0)).toEqual(stage1.difficultyStart);
   });
 
-  it('compounds x0.9 every 15 s', () => {
-    expect(spawnInterval(15)).toBeCloseTo(1.08, 10);
-    expect(spawnInterval(30)).toBeCloseTo(0.972, 10);
+  it('stays on the start values just before the first step', () => {
+    expect(difficultyAt(stage1, DIFFICULTY_STEP_SECONDS - 0.01)).toEqual(stage1.difficultyStart);
   });
 
-  it('stops at 0.6 s from 120 s on', () => {
-    expect(spawnInterval(120)).toBe(0.6);
-    expect(spawnInterval(600)).toBe(0.6);
+  it('takes the first step at exactly 8 s, also with floating-point error (BR1.10)', () => {
+    const exact = difficultyAt(stage1, DIFFICULTY_STEP_SECONDS);
+    expect(exact.fallSpeedMultiplier).toBeCloseTo(1.05, 10);
+    // 480 frames of 1/60 s accumulate to a value that may fall just short of 8.
+    let t = 0;
+    for (let i = 0; i < 480; i++) t += 1 / 60;
+    expect(difficultyAt(stage1, t).fallSpeedMultiplier).toBeCloseTo(1.05, 10);
   });
 
-  it('treats invalid or negative time as the start', () => {
-    expect(spawnInterval(-5)).toBeCloseTo(1.2, 10);
-    expect(spawnInterval(Number.NaN)).toBeCloseTo(1.2, 10);
-  });
-});
-
-describe('speedMultiplier', () => {
-  it('is 1.0 at the start and 1.1 at 15 s', () => {
-    expect(speedMultiplier(0)).toBe(1);
-    expect(speedMultiplier(15)).toBeCloseTo(1.1, 10);
+  it('gives the Stage 1 example at 17 s (two steps)', () => {
+    const d = difficultyAt(stage1, 17);
+    expect(d.fallSpeedMultiplier).toBeCloseTo(1.1, 10);
+    expect(d.spawnInterval).toBeCloseTo(1.1, 10);
+    expect(d.virusShare).toBeCloseTo(0.125, 10);
+    expect(d.maxObjects).toBe(3);
   });
 
-  it('is about 1.21 at 30 s', () => {
-    expect(speedMultiplier(30)).toBeCloseTo(1.21, 10);
+  it('reaches the cap at 32 s and holds it at 100 s', () => {
+    expect(difficultyAt(stage1, capTime)).toEqual(stage1.difficultyCap);
+    expect(difficultyAt(stage1, 100)).toEqual(stage1.difficultyCap);
   });
 
-  it('is capped at 2.0 from 120 s on', () => {
-    expect(speedMultiplier(120)).toBe(2);
-    expect(speedMultiplier(1000)).toBe(2);
+  it('rounds maxObjects down', () => {
+    // Stage 1 at 3 steps: 3 + 1 * 0.75 = 3.75 -> 3
+    expect(difficultyAt(stage1, DIFFICULTY_STEP_SECONDS * 3).maxObjects).toBe(3);
   });
 
-  it('LLM MODEL fall time at 15 s is about 3.64 s', () => {
-    expect(4.0 / speedMultiplier(15)).toBeCloseTo(3.636, 2);
-  });
-});
+  it.each([-1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    'uses the start values for invalid time %s',
+    (t) => {
+      expect(difficultyAt(stage1, t)).toEqual(stage1.difficultyStart);
+    },
+  );
 
-describe('virusShare', () => {
-  it('is 0 before 10 s', () => {
-    expect(virusShare(0)).toBe(0);
-    expect(virusShare(9.99)).toBe(0);
-  });
-
-  it('is 20% from 10 s and rises 5 points every 15 s', () => {
-    expect(virusShare(10)).toBeCloseTo(0.2, 10);
-    expect(virusShare(25)).toBeCloseTo(0.25, 10);
-    expect(virusShare(40)).toBeCloseTo(0.3, 10);
-    expect(virusShare(55)).toBeCloseTo(0.35, 10);
-  });
-
-  it('is capped at 40% from 70 s', () => {
-    expect(virusShare(70)).toBeCloseTo(0.4, 10);
-    expect(virusShare(500)).toBeCloseTo(0.4, 10);
+  it('uses the values of the given stage', () => {
+    expect(difficultyAt(STAGES[3]!, 0)).toEqual(STAGES[3]!.difficultyStart);
   });
 });

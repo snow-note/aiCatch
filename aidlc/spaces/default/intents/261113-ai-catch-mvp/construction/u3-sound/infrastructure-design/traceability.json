@@ -1,0 +1,13 @@
+{
+  "stage": "infrastructure-design",
+  "unit": "u3-sound",
+  "upstream_ids": ["NFR5.7","NFR5.8","NFR5.9","NFR5.10","NFR6.4","NFR8.16"],
+  "coverage": [
+    { "id": "NFR5.7", "status": "OK", "target": "review gate for network and audio-file APIs (cicd-pipeline stage 4)" },
+    { "id": "NFR5.8", "status": "OK", "target": "npm test gate (silent-failure tests)" },
+    { "id": "NFR5.9", "status": "OK", "target": "review gate and preview play check on a phone" },
+    { "id": "NFR5.10", "status": "N/A", "target": "code-level gain value; no infrastructure needed, checked in review" },
+    { "id": "NFR6.4", "status": "OK", "target": "ASSETS.md review gate" },
+    { "id": "NFR8.16", "status": "OK", "target": "npm test gate (soundForEvent tests)" }
+  ]
+}

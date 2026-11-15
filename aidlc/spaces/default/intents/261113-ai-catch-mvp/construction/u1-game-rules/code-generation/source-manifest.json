@@ -1,0 +1,24 @@
+{
+  "stage": "code-generation",
+  "unit": "u1-game-rules",
+  "version": 1,
+  "writes": [
+    { "path": "src/game/types.ts" },
+    { "path": "src/game/run.ts" },
+    { "path": "src/game/config.ts" },
+    { "path": "src/game/difficulty.ts" },
+    { "path": "src/game/objects.ts" },
+    { "path": "src/game/spawner.ts" },
+    { "path": "src/game/state.ts" },
+    { "path": "src/main.ts" },
+    { "path": "src/render/renderer.ts" },
+    { "path": "tests/game/config.test.ts" },
+    { "path": "tests/game/run.test.ts" },
+    { "path": "tests/game/objects.test.ts" },
+    { "path": "tests/game/difficulty.test.ts" },
+    { "path": "tests/game/spawner.test.ts" },
+    { "path": "tests/game/state.test.ts" },
+    { "path": "tests/game/highscore.test.ts" },
+    { "path": "tests/game/input.test.ts" }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "stage": "code-generation",
+  "unit": "u4-accessibility",
+  "version": 1,
+  "writes": [
+    { "path": "src/game/announcer.ts" },
+    { "path": "src/main.ts" },
+    { "path": "tests/game/announcer.test.ts" }
+  ]
+}

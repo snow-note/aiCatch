@@ -73,6 +73,46 @@ describe('HighScoreStore', () => {
   });
 });
 
+describe('HighScoreStore edge cases (BR8.1, BR8.2)', () => {
+  it('loads very large digit strings as 0', () => {
+    expect(new HighScoreStore(memoryStorage('9'.repeat(40))).best).toBe(0);
+  });
+
+  it('accepts surrounding whitespace around a valid number', () => {
+    expect(new HighScoreStore(memoryStorage(' 120 ')).best).toBe(120);
+  });
+
+  it('treats a missing item (null) as 0', () => {
+    expect(new HighScoreStore(memoryStorage()).best).toBe(0);
+  });
+
+  it('survives a throwing getItem and still saves in memory', () => {
+    const readFails = {
+      getItem: (): string | null => {
+        throw new Error('read blocked');
+      },
+      setItem: (): void => undefined,
+    };
+    const store = new HighScoreStore(readFails);
+    expect(store.best).toBe(0);
+    expect(store.submit(40)).toBe(true);
+    expect(store.best).toBe(40);
+  });
+
+  it('survives a throwing setItem and keeps the new best', () => {
+    const writeFails = {
+      getItem: (): string | null => '10',
+      setItem: (): void => {
+        throw new Error('quota');
+      },
+    };
+    const store = new HighScoreStore(writeFails);
+    expect(store.best).toBe(10);
+    expect(store.submit(70)).toBe(true);
+    expect(store.best).toBe(70);
+  });
+});
+
 describe('parseStoredScore', () => {
   it('parses whole numbers', () => {
     expect(parseStoredScore('1200')).toBe(1200);

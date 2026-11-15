@@ -1,0 +1,33 @@
+{
+  "stage": "code-generation",
+  "unit": "u4-accessibility",
+  "upstream_ids": ["AC6.1.1","AC6.1.2","AC6.1.3","AC6.1.4","AC6.1.5","AC6.1.6","AC6.1.7","AC6.1.8","AC6.1.9","AC6.1.10","NFR5.11","NFR5.12","NFR5.13","NFR1.4","NFR2.4","NFR8.20","BR1.1","BR1.2","BR1.3","BR1.4","BR1.5","BR1.6","BR2.1","BR2.2","BR2.3","BR2.4"],
+  "coverage": [
+    { "id": "AC6.1.1", "status": "N/A", "target": "LCD look delivered by u2-screens-and-art" },
+    { "id": "AC6.1.2", "status": "N/A", "target": "shape-distinct art delivered by u2-screens-and-art" },
+    { "id": "AC6.1.3", "status": "N/A", "target": "pixel font delivered by u2-screens-and-art" },
+    { "id": "AC6.1.4", "status": "N/A", "target": "visual effects delivered by u2-screens-and-art" },
+    { "id": "AC6.1.5", "status": "N/A", "target": "sounds delivered by u3-sound" },
+    { "id": "AC6.1.6", "status": "N/A", "target": "silent sound fallback delivered by u3-sound" },
+    { "id": "AC6.1.7", "status": "N/A", "target": "layout and rotation delivered by u2-screens-and-art" },
+    { "id": "AC6.1.8", "status": "N/A", "target": "single h1 and keyboard play delivered by u2-screens-and-art" },
+    { "id": "AC6.1.9", "status": "OK", "target": "src/game/announcer.ts" },
+    { "id": "AC6.1.10", "status": "N/A", "target": "u4 adds no external asset" },
+    { "id": "NFR5.11", "status": "OK", "target": "src/main.ts" },
+    { "id": "NFR5.12", "status": "OK", "target": "src/main.ts" },
+    { "id": "NFR5.13", "status": "OK", "target": "src/game/announcer.ts" },
+    { "id": "NFR1.4", "status": "OK", "target": "tests/game/announcer.test.ts" },
+    { "id": "NFR2.4", "status": "OK", "target": "src/game/announcer.ts" },
+    { "id": "NFR8.20", "status": "OK", "target": "tests/game/announcer.test.ts" },
+    { "id": "BR1.1", "status": "OK", "target": "src/game/announcer.ts" },
+    { "id": "BR1.2", "status": "OK", "target": "tests/game/announcer.test.ts" },
+    { "id": "BR1.3", "status": "OK", "target": "tests/game/announcer.test.ts" },
+    { "id": "BR1.4", "status": "OK", "target": "tests/game/announcer.test.ts" },
+    { "id": "BR1.5", "status": "OK", "target": "tests/game/announcer.test.ts" },
+    { "id": "BR1.6", "status": "OK", "target": "tests/game/announcer.test.ts" },
+    { "id": "BR2.1", "status": "OK", "target": "tests/game/announcer.test.ts" },
+    { "id": "BR2.2", "status": "OK", "target": "src/main.ts" },
+    { "id": "BR2.3", "status": "OK", "target": "src/main.ts" },
+    { "id": "BR2.4", "status": "OK", "target": "src/main.ts" }
+  ]
+}

@@ -30,10 +30,10 @@ body {
   height: 240px;
   transform-origin: 0 0;
   box-sizing: border-box;
-  background: #c9c3b0;
+  background: #c4c7cc;
   border-radius: 14px 14px 36px 14px;
-  box-shadow: inset 0 0 0 3px #a7a08a, inset 0 -6px 0 #b0a992;
-  color: #3b3a33;
+  box-shadow: inset 0 0 0 3px #9fa3aa, inset 0 -6px 0 #adb1b8;
+  color: #2f3540;
 }
 
 .brand {
@@ -41,11 +41,12 @@ body {
   left: 0;
   right: 0;
   top: 4px;
+  margin: 0;
   text-align: center;
   font-size: 11px;
   font-weight: bold;
   letter-spacing: 3px;
-  color: #6c2b2b;
+  color: #2f3540;
 }
 
 .bezel {
@@ -91,15 +92,12 @@ body {
   border: 0;
   border-radius: 12px;
   color: #f2eedd;
-  background: #8c2f39;
-  box-shadow: 0 3px 0 #5b1d24;
   cursor: pointer;
   touch-action: manipulation;
 }
 
 .btn:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #5b1d24;
 }
 
 #start-button {
@@ -111,8 +109,26 @@ body {
   box-shadow: 0 1px 0 #1d3b57;
 }
 
+#start-button:focus-visible {
+  outline: 2px solid #2f3540;
+  outline-offset: 2px;
+}
+
 .hint {
   font-size: 9px;
   letter-spacing: 1px;
-  color: #6b6858;
+  color: #4a4f58;
+}
+
+/* Text for assistive technology only; never shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
