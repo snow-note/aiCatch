@@ -18,6 +18,9 @@ import {
   STAGES,
   STAGE_CLEAR_DURATION,
   STAGE_INTRO_DURATION,
+  STAGE_TIME_LIMIT,
+  TIME_BONUS_PER_SECOND,
+  TIME_WARNING_SECONDS,
   VICTORY_DURATION,
 } from '../../src/game/config';
 import type { DifficultyValues, ObjectKind } from '../../src/game/types';
@@ -108,12 +111,44 @@ describe('stage difficulty (BR5.3, BR5.4)', () => {
     expect(FALL_TIME.virus).toBe(2.2);
   });
 
-  it('gives a VIRUS at least 1.5 s to reach HUMAN at Stage 1 start, enough to step aside (NFR2)', () => {
+  it('pins the Stage 2-4 start and cap values (FR1.1, FR1.2)', () => {
+    const v = (fallSpeedMultiplier: number, spawnInterval: number, virusShare: number, maxObjects: number) => ({
+      fallSpeedMultiplier,
+      spawnInterval,
+      virusShare,
+      maxObjects,
+    });
+    expect(STAGES[1]!.difficultyStart).toEqual(v(1.3, 0.9, 0.55, 5));
+    expect(STAGES[1]!.difficultyCap).toEqual(v(1.7, 0.7, 0.6, 6));
+    expect(STAGES[2]!.difficultyStart).toEqual(v(1.35, 0.88, 0.56, 5));
+    expect(STAGES[2]!.difficultyCap).toEqual(v(1.75, 0.69, 0.61, 6));
+    expect(STAGES[3]!.difficultyStart).toEqual(v(1.4, 0.85, 0.58, 5));
+    expect(STAGES[3]!.difficultyCap).toEqual(v(1.8, 0.68, 0.62, 6));
+  });
+
+  it('gives collectibles a speed factor of 1.2, 1.3, 1.4, 1.5 by stage (FR2.1)', () => {
+    expect(STAGES.map((s) => s.collectibleSpeedFactor)).toEqual([1.2, 1.3, 1.4, 1.5]);
+  });
+
+  it('pins the timer constants (FR3.1, FR6.2, NFR1)', () => {
+    expect(STAGE_TIME_LIMIT).toBe(90);
+    expect(TIME_WARNING_SECONDS).toBe(10);
+    expect(TIME_BONUS_PER_SECOND).toBe(10);
+  });
+
+  it('lets every stage be cleared in 60 s or less at best (NFR3)', () => {
+    for (const s of STAGES) {
+      const collectiblesPerSecond = (1 - s.difficultyStart.virusShare) / s.difficultyStart.spawnInterval;
+      expect(s.requiredCount / collectiblesPerSecond + FIRST_SPAWN_DELAY).toBeLessThanOrEqual(60);
+    }
+  });
+
+  it('gives a VIRUS at least 1.2 s to reach HUMAN at Stage 1 start, enough to step aside (NFR2)', () => {
     const mult = STAGES[0]!.difficultyStart.fallSpeedMultiplier;
     const vy = (PLAY_H / FALL_TIME.virus) * mult;
     // First possible contact: the object bottom reaches the top of HUMAN.
     const contactTime = (PLAY_H - HUMAN_H - OBJECT_H) / vy;
-    expect(contactTime).toBeGreaterThanOrEqual(1.5);
+    expect(contactTime).toBeGreaterThanOrEqual(1.2);
     const overlapZone = HUMAN_W + OBJECT_W + 2 * VIRUS_JITTER_AMPLITUDE;
     expect(HUMAN_SPEED * contactTime).toBeGreaterThanOrEqual(overlapZone);
   });

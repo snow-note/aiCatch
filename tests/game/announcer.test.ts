@@ -17,6 +17,8 @@ function makeView(phase: Phase, stageIndex: number, over: Partial<GameView> = {}
     stageIndex,
     caught: 0,
     aiRestoration: stageIndex * 25,
+    timeLeft: 90,
+    gameOverReason: null,
     human: { x: 0, y: 0, w: 20, h: 20 },
     objects: [],
     ...over,
@@ -71,6 +73,13 @@ describe('screenAnnouncement text', () => {
     expect(screenAnnouncement(fresh).text).toBe(
       'Game over. AI 25%. Score 800. High score 800. New high score.',
     );
+  });
+
+  it('starts a time-out game over with "Time up." and leaves a lives game over unchanged (FR5.3)', () => {
+    const time = makeView('game-over', 1, { score: 800, best: 1200, aiRestoration: 25, gameOverReason: 'time' });
+    expect(screenAnnouncement(time).text).toBe('Time up. Game over. AI 25%. Score 800. High score 1200.');
+    const lives = makeView('game-over', 1, { score: 800, best: 1200, aiRestoration: 25, gameOverReason: 'lives' });
+    expect(screenAnnouncement(lives).text).toBe('Game over. AI 25%. Score 800. High score 1200.');
   });
 
   it('announces victory, with the suffix only for a new high score (BR1.2, BR1.5)', () => {

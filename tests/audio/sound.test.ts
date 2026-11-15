@@ -128,9 +128,17 @@ describe('soundForEvent', () => {
 
   it('maps virus-hit, stage-clear, victory and game-over to their cues', () => {
     expect(soundForEvent({ type: 'virus-hit', x: 0, y: 0 })).toBe('virus-hit');
-    expect(soundForEvent({ type: 'stage-clear', stageIndex: 0, bonus: 100, aiRestoration: 25 })).toBe('stage-clear');
+    expect(soundForEvent({ type: 'stage-clear', stageIndex: 0, bonus: 100, timeBonus: 0, aiRestoration: 25 })).toBe('stage-clear');
     expect(soundForEvent({ type: 'victory', score: 500, newHighScore: false })).toBe('victory');
-    expect(soundForEvent({ type: 'game-over', score: 50, newHighScore: false })).toBe('game-over');
+    expect(soundForEvent({ type: 'game-over', score: 50, newHighScore: false, reason: 'lives' })).toBe('game-over');
+  });
+
+  it('maps time-warning to the time-tick beep, a short valid note (FR4.3)', () => {
+    expect(soundForEvent({ type: 'time-warning', secondsLeft: 5 })).toBe('time-tick');
+    const notes = SOUNDS['time-tick'];
+    expect(notes).toHaveLength(1);
+    expect(notes[0]!.freq).toBeGreaterThan(0);
+    expect(soundDuration(notes)).toBeLessThanOrEqual(0.1);
   });
 
   it('returns null for stage-start and life-lost', () => {

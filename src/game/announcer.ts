@@ -30,7 +30,7 @@ function text(view: GameView): string {
     case 'stage-clear':
       return `${name} recovered. ${ai}.`;
     case 'game-over':
-      return `Game over. ${ai}. Score ${score}. ${hs}${high}`;
+      return `${view.gameOverReason === 'time' ? 'Time up. ' : ''}Game over. ${ai}. Score ${score}. ${hs}${high}`;
     default:
       return `AI restored, 100%. Humans saved AI. Save the AI, save the future. Score ${score}.${high}`;
   }

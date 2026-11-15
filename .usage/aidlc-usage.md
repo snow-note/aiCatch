@@ -1,12 +1,12 @@
 # AI-DLC Usage Report
 
-Generated from `aidlc-usage.csv` at 2026-11-15T18:02:41+09:00. Do not edit by hand; it is regenerated after each stage.
+Generated from `aidlc-usage.csv` at 2026-11-15T19:32:31+09:00. Do not edit by hand; it is regenerated after each stage.
 
-- Stage runs: 54
-- Total duration: 49h 10m 23s
-- Total credits: 834.026 (28 N/A)
+- Stage runs: 62
+- Total duration: 50h 25m 11s
+- Total credits: 931.279 (31 N/A)
 - Time zone: UTC+09:00
-- Hosts: unknown (7), Mac (47)
+- Hosts: unknown (7), Mac (55)
 
 ## Stage Log
 
@@ -66,20 +66,28 @@ Generated from `aidlc-usage.csv` at 2026-11-15T18:02:41+09:00. Do not edit by ha
 | 52 | construction | code-generation | 2026-11-15 17:49:25 | 2026-11-15 17:57:17 | 7m 51s | 35.7404 | Mac | approved: code-generation |
 | 53 | construction | build-and-test | 2026-11-15 17:57:34 | 2026-11-15 18:02:08 | 4m 34s | 11.4072 | Mac | approved: build-and-test |
 | 54 | operation | deployment-pipeline | 2026-11-15 18:02:27 | 2026-11-15 18:02:40 | 13s | N/A | Mac | skipped: deployment-pipeline |
+| 55 | operation | deployment-execution | 2026-11-15 18:02:59 | 2026-11-15 18:46:03 | 43m 5s | 31.4733 | Mac | approved: deployment-execution |
+| 56 | operation | observability-setup | 2026-11-15 18:46:23 | 2026-11-15 18:46:37 | 14s | N/A | Mac | skipped: observability-setup |
+| 57 | inception | reverse-engineering | 2026-11-15 18:59:04 | 2026-11-15 19:08:04 | 9m 0s | 27.8896 | Mac | approved: reverse-engineering |
+| 58 | inception | requirements-analysis | 2026-11-15 19:09:14 | 2026-11-15 19:15:53 | 6m 39s | 8.563 | Mac | approved: requirements-analysis |
+| 59 | construction | code-generation | 2026-11-15 19:16:12 | 2026-11-15 19:18:42 | 2m 29s | N/A | Mac | auto-ended by stage transition |
+| 60 | construction | code-generation | 2026-11-15 19:18:42 | 2026-11-15 19:26:25 | 7m 43s | 24.5817 | Mac | approved: code-generation |
+| 61 | construction | build-and-test | 2026-11-15 19:26:38 | 2026-11-15 19:32:12 | 5m 33s | 4.7453 | Mac | approved: build-and-test |
+| 62 | operation | deployment-pipeline | 2026-11-15 19:32:26 | 2026-11-15 19:32:31 | 5s | N/A | Mac | skipped: deployment-pipeline |
 
 ## Totals by Stage
 
 | Phase | Stage | Runs | Duration | Credits |
 |---|---|---:|---:|---:|
-| inception | requirements-analysis | 3 | 3h 20m 29s | 40.5153 (1 N/A) |
+| inception | requirements-analysis | 4 | 3h 27m 8s | 49.0783 (1 N/A) |
 | inception | user-stories | 2 | 3h 14m 4s | 20.1764 (1 N/A) |
-| construction | code-generation | 16 | 1h 55m 56s | 202.227 (12 N/A) |
-| construction | build-and-test | 3 | 15m 33s | 19.248 (1 N/A) |
+| construction | code-generation | 18 | 2h 6m 8s | 226.809 (13 N/A) |
+| construction | build-and-test | 4 | 21m 6s | 23.9933 (1 N/A) |
 | ideation | intent-capture | 1 | 22m 6s | 30.2173 |
 | ideation | feasibility | 1 | 5m 59s | 12.0521 |
 | ideation | scope-definition | 1 | 7m 27s | 8.7738 |
 | ideation | rough-mockups | 1 | 13m 48s | 23.7029 |
-| inception | reverse-engineering | 2 | 13m 42s | 39.5666 |
+| inception | reverse-engineering | 3 | 22m 42s | 67.4562 |
 | inception | practices-discovery | 1 | 8m 7s | 14.7025 |
 | inception | refined-mockups | 1 | 34m 12s | 21.7971 |
 | inception | domain-design | 1 | 49m 48s | 25.7369 |
@@ -91,7 +99,9 @@ Generated from `aidlc-usage.csv` at 2026-11-15T18:02:41+09:00. Do not edit by ha
 | construction | nfr-design | 3 | 8m 9s | N/A |
 | construction | infrastructure-design | 3 | 6m 51s | N/A |
 | construction | ci-pipeline | 1 | 0s | N/A |
-| operation | deployment-pipeline | 1 | 13s | N/A |
+| operation | deployment-pipeline | 2 | 18s | N/A |
+| operation | deployment-execution | 1 | 43m 5s | 31.4733 |
+| operation | observability-setup | 1 | 14s | N/A |
 
 ## Notes
 

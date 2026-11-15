@@ -27,6 +27,7 @@ export type SoundName =
   | 'stage-clear'
   | 'victory'
   | 'virus-hit'
+  | 'time-tick'
   | 'game-over';
 
 export const SOUNDS: Readonly<Record<SoundName, readonly Note[]>> = {
@@ -88,6 +89,8 @@ export const SOUNDS: Readonly<Record<SoundName, readonly Note[]>> = {
     { freq: 140, start: 0.1, dur: 0.1, slideTo: 60 },
     { freq: 110, start: 0.2, dur: 0.15, slideTo: 40 },
   ],
+  // Last-10-seconds beep: one short high tick (FR4.3).
+  'time-tick': [{ freq: 1047, start: 0.0, dur: 0.06 }],
   'game-over': [
     { freq: 523, start: 0.0, dur: 0.22 },
     { freq: 392, start: 0.28, dur: 0.22 },
@@ -117,6 +120,8 @@ export function soundForEvent(e: GameEvent): SoundName | null {
       return 'victory';
     case 'game-over':
       return 'game-over';
+    case 'time-warning':
+      return 'time-tick';
     default:
       return null;
   }

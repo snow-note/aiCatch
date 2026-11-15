@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { OBJECT_W, PLAY_H, PLAY_W, STAGES, VIRUS_AIM_SHARE, VIRUS_AIM_SPREAD } from '../../src/game/config';
+import { FALL_TIME, OBJECT_W, PLAY_H, PLAY_W, STAGES, VIRUS_AIM_SHARE, VIRUS_AIM_SPREAD } from '../../src/game/config';
 import { pickKind, spawnObject } from '../../src/game/spawner';
 import type { CollectibleKind } from '../../src/game/types';
 
@@ -59,10 +59,19 @@ describe('spawnObject (BR6.3)', () => {
   });
 
   it('applies the fall speed multiplier to the object speed', () => {
-    const slow = spawnObject(['mainframe'], { ...d, fallSpeedMultiplier: 1 }, 0, scripted([0.9, 0.5, 0.5, 0]));
-    const fast = spawnObject(['mainframe'], { ...d, fallSpeedMultiplier: 1.5 }, 1, scripted([0.9, 0.5, 0.5, 0]));
+    const slow = spawnObject(['mainframe'], { ...d, fallSpeedMultiplier: 1 }, 0, scripted([0.9, 0.5, 0.5, 0]), undefined, 1.2);
+    const fast = spawnObject(['mainframe'], { ...d, fallSpeedMultiplier: 1.5 }, 1, scripted([0.9, 0.5, 0.5, 0]), undefined, 1.2);
     expect(fast.vy / slow.vy).toBeCloseTo(1.5, 10);
-    expect(slow.vy).toBeCloseTo(PLAY_H / 4.0, 10);
+    expect(slow.vy).toBeCloseTo((PLAY_H / 4.0) * 1.2, 10);
+  });
+
+  it('speeds up a collectible by the stage factor but not a VIRUS (FR2.1, FR2.2)', () => {
+    const mult = { ...d, fallSpeedMultiplier: 1.3 };
+    const c = spawnObject(['tape'], mult, 0, scripted([0.9, 0.5, 0.5, 0]), undefined, 1.3);
+    expect(c.vy).toBeCloseTo((PLAY_H / FALL_TIME.tape) * 1.3 * 1.3, 10);
+    const v = spawnObject(['tape'], mult, 1, scripted([0, 0.5, 0]), undefined, 1.3);
+    expect(v.kind).toBe('virus');
+    expect(v.vy).toBeCloseTo((PLAY_H / FALL_TIME.virus) * 1.3, 10);
   });
 
   it('creates a virus when the draw is below the virus share and keeps the order', () => {

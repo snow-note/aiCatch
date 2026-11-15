@@ -7,6 +7,7 @@ import {
   BLINK_HZ,
   CLEAR_BAR_FILL,
   EPS,
+  TIME_WARNING_SECONDS,
   VICTORY_DURATION,
   VICTORY_MESSAGE_STEP,
   VICTORY_REBOOT_END,
@@ -68,6 +69,17 @@ export function blinkOn(t: number): boolean {
   const period = 1 / BLINK_HZ;
   const phase = ((t % period) + period) % period;
   return phase < period / 2 - EPS;
+}
+
+/** FR4.1: the HUD timer text, remaining seconds rounded up (bad values read as 0). */
+export function timerText(timeLeft: number): string {
+  const s = Number.isFinite(timeLeft) ? Math.max(0, Math.ceil(timeLeft)) : 0;
+  return `T ${s}`;
+}
+
+/** FR4.2: the timer always shows above the warning window and blinks inside it. */
+export function timerVisible(timeLeft: number, phaseTime: number): boolean {
+  return timeLeft > TIME_WARNING_SECONDS || blinkOn(phaseTime);
 }
 
 /** BR2.1: the three HUD strings. Stage 4 shows one combined count. */

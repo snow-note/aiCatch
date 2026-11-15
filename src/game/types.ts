@@ -31,7 +31,11 @@ export interface StageDefinition {
   readonly difficultyStart: DifficultyValues;
   readonly difficultyCap: DifficultyValues;
   readonly clearBonus: number;
+  /** Extra fall speed of collectibles only; VIRUS is excluded (FR2.1, FR2.2). */
+  readonly collectibleSpeedFactor: number;
 }
+
+export type GameOverReason = 'lives' | 'time';
 
 /** C1: read-only view for drawing and announcements. */
 export interface GameView {
@@ -50,6 +54,10 @@ export interface GameView {
   readonly stageIndex: number;
   readonly caught: number;
   readonly aiRestoration: number;
+  /** Seconds left in the current stage; the full limit until play starts (FR3.6). */
+  readonly timeLeft: number;
+  /** Why the run ended, or null while it has not (FR5.1). */
+  readonly gameOverReason: GameOverReason | null;
 
   readonly human: { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
   readonly objects: ReadonlyArray<{
@@ -68,9 +76,10 @@ export type GameEvent =
   | { type: 'catch'; kind: CollectibleKind; points: number; x: number; y: number }
   | { type: 'virus-hit'; x: number; y: number }
   | { type: 'life-lost'; lives: number }
-  | { type: 'stage-clear'; stageIndex: number; bonus: number; aiRestoration: number }
+  | { type: 'stage-clear'; stageIndex: number; bonus: number; timeBonus: number; aiRestoration: number }
+  | { type: 'time-warning'; secondsLeft: number }
   | { type: 'victory'; score: number; newHighScore: boolean }
-  | { type: 'game-over'; score: number; newHighScore: boolean };
+  | { type: 'game-over'; score: number; newHighScore: boolean; reason: GameOverReason };
 
 /** C4: how Bootstrap drives the game. None of these methods throw. */
 export interface GameControls {

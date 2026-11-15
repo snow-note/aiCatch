@@ -48,6 +48,8 @@ function view(phase: Phase, over: Partial<GameView> = {}): GameView {
     stageIndex,
     caught: 2,
     aiRestoration: 25,
+    timeLeft: 90,
+    gameOverReason: null,
     human: { x: 100, y: 130, w: 16, h: 14 },
     objects: [],
     ...over,
@@ -90,6 +92,21 @@ describe('Renderer.draw per phase', () => {
   it('falls back to a sprite for an unknown object kind', () => {
     const objects = [{ kind: 'bogus' as unknown as ObjectKind, x: 5, y: 40, w: OBJECT_W, h: OBJECT_H }];
     drawAndCheck(view('playing', { objects }));
+  });
+
+  it('draws the HUD timer in both blink states and at zero (FR4.1, FR4.2)', () => {
+    const ctx = drawAndCheck(view('playing', { timeLeft: 90 }));
+    drawAndCheck(view('playing', { timeLeft: 8, phaseTime: 0.2 }));
+    const off = drawAndCheck(view('playing', { timeLeft: 8, phaseTime: 0.7 }));
+    drawAndCheck(view('playing', { timeLeft: 0 }));
+    // The blink-off frame skips the timer text, so it draws fewer rectangles.
+    expect(off.fillRectCalls).toBeLessThan(ctx.fillRectCalls);
+  });
+
+  it('draws TIME UP on a time-out game over only (FR5.2)', () => {
+    const lives = drawAndCheck(view('game-over', { gameOverReason: 'lives' }));
+    const time = drawAndCheck(view('game-over', { gameOverReason: 'time' }));
+    expect(time.fillRectCalls).toBeGreaterThan(lives.fillRectCalls);
   });
 
   it('draws stage clear at 0 s and 1 s', () => {
@@ -174,7 +191,7 @@ describe('Renderer effects', () => {
 
   it('ignores stage-clear events', () => {
     const { renderer, ctx } = makeRenderer();
-    renderer.onEvent({ type: 'stage-clear', stageIndex: 0, bonus: 500, aiRestoration: 25 });
+    renderer.onEvent({ type: 'stage-clear', stageIndex: 0, bonus: 500, timeBonus: 0, aiRestoration: 25 });
     renderer.draw(playing, 1);
     const { renderer: fresh, ctx: freshCtx } = makeRenderer();
     fresh.draw(playing, 1);
